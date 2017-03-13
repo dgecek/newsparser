@@ -1,0 +1,38 @@
+package hr.dgecek.newsparser.DB;
+
+import com.mongodb.MongoClient;
+import org.mongodb.morphia.Datastore;
+import org.mongodb.morphia.Morphia;
+
+/**
+ * Created by dgecek on 10.11.16..
+ */
+public final class MorphiaManager {
+
+    public static final String DB_NAME = "newsParser";
+    private static final String PACKAGE_NAME = "hr.dgecek.newsparser.entity";
+
+    private static ArticleDatastoreWrapper datastoreInstance;
+
+    public static ArticleDatastoreWrapper getDataStore() {
+        if(datastoreInstance == null) {
+            final Morphia morphia = new Morphia();
+
+            // tell Morphia where to find your classes
+            // can be called multiple times with different packages or classes
+            morphia.mapPackage(PACKAGE_NAME);
+
+            // create the Datastore connecting to the default port on the local host
+            final Datastore datastore = morphia.createDatastore(new MongoClient(), DB_NAME);
+            datastore.ensureIndexes();
+
+            datastoreInstance = new ArticleDatastoreWrapper(datastore);
+        }
+
+        return datastoreInstance;
+    }
+
+    private MorphiaManager(){
+
+    }
+}
