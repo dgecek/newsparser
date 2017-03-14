@@ -3,9 +3,6 @@ package hr.dgecek.newsparser.categorizer;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by dgecek on 24.12.16..
- */
 public final class CategorizerImpl implements Categorizer {
     final private Map<String, String> categories = new HashMap<>();
 
@@ -29,6 +26,7 @@ public final class CategorizerImpl implements Categorizer {
         categories.put("politika-kriminal", "vijesti");
         categories.put("globus", "vijesti");
         categories.put("biznis", "vijesti");
+        categories.put("kolumnisti", "vijesti");
 
         categories.put("spektakli", "reality");
         categories.put("rouge", "reality");

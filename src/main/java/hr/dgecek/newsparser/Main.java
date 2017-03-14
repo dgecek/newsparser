@@ -3,6 +3,8 @@ package hr.dgecek.newsparser;
 import hr.dgecek.newsparser.DB.MorphiaManager;
 import hr.dgecek.newsparser.categorizer.Categorizer;
 import hr.dgecek.newsparser.categorizer.CategorizerImpl;
+import hr.dgecek.newsparser.sentimentfilter.SentimentFilter;
+import hr.dgecek.newsparser.sentimentfilter.SentimentFilterImpl;
 import hr.dgecek.newsparser.stemmer.LjubesicPandzicStemmer;
 import hr.dgecek.newsparser.stemmer.SCStemmer;
 import hr.dgecek.newsparser.stopwordremover.StopWordsRemover;
@@ -18,6 +20,7 @@ public final class Main {
     private static final long TIME_BETWEEN_DOWNLOADING = 10 * 60 * 1000;
 
     public static void main(final String[] args) throws IOException, InterruptedException {
+
         final ArticleDAO datastore = MorphiaManager.getDataStore();
         final SCStemmer stemmer = new LjubesicPandzicStemmer();
         final StopWordsRemover stopWordsRemover = new StopWordsRemoverImpl();
@@ -25,10 +28,11 @@ public final class Main {
         final NewsDownloader downloader = new NewsDownloader(datastore);
         final NewsAnnotator annotator = new NewsAnnotator(datastore, categorizer);
         final NegationsManager negationsManager = new NegationsManager();
-        final FeaturesFormatter featuresFormatter = new FeaturesFormatter(datastore, stemmer, stopWordsRemover, categorizer, negationsManager);
+        final SentimentFilter sentimentFilter = new SentimentFilterImpl(stemmer);
+        final FeaturesFormatter featuresFormatter = new FeaturesFormatter(datastore, stemmer, stopWordsRemover, categorizer, negationsManager, sentimentFilter);
 
-        downloader.downloadNews();
-        annotator.startUserAnnotation();
+        //downloader.downloadNews();
+        //annotator.startUserAnnotation();
         featuresFormatter.saveToFile();
     }
 }

@@ -1,6 +1,6 @@
 package hr.dgecek.newsparser;
 
-import hr.dgecek.newsparser.DB.ArticleDatastoreWrapper;
+import hr.dgecek.newsparser.categorizer.Categorizer;
 import hr.dgecek.newsparser.entity.NewsArticle;
 import hr.dgecek.newsparser.portalinfo.*;
 import org.jsoup.Connection;
@@ -22,7 +22,7 @@ public final class NewsDownloader {
     public static final int CONNECTION_TIMEOUT = 5000;
     public static final int WAIT_BEFORE_NEXT_CONNECTION_MILLIS = 200;
     private static final long WAIT_IF_CONNECTION_REFUSED_MILLIS = 500;
-    private static List<PortalInfo> portalInfoList;
+    private static final List<PortalInfo> portalInfoList;
     private final ArticleDAO dataStore;
 
     static {
@@ -53,31 +53,29 @@ public final class NewsDownloader {
         System.out.println(dataStore.getStatistics());
     }
 
-    private void saveAllArticlesFromLinks(Elements links, PortalInfo portal) throws InterruptedException {
-        for (Element link : links) {
-            String articleUrl = link.attr(HREF_SELECTOR);
+    private void saveAllArticlesFromLinks(final Elements links, final PortalInfo portal) throws InterruptedException {
+        for (final Element link : links) {
+            final String articleUrl = link.attr(HREF_SELECTOR);
             if (portal.checkNewsURLRegex(articleUrl)) {
-                NewsArticle article = new NewsArticle();
+                final NewsArticle article = new NewsArticle();
                 article.setUrl(articleUrl);
 
                 waitBeforeNextRequest();
-                Document artDOM = getArticleDocument(portal, article);
+                final Document artDOM = getArticleDocument(portal, article);
 
                 if (artDOM == null) {
                     waitIfConnectionRefused();
                     continue;
                 }
 
-                String title = getTitle(artDOM);
-
+                final String title = getTitle(artDOM);
                 article.setTitle(title);
-                String unparsedArticle = artDOM.select(portal.getArticleSelector()).toString();
-                String parsedArticle = ArticleParser.parse(unparsedArticle);
+
+                final String unparsedArticle = artDOM.select(portal.getArticleSelector()).toString();
+                final String parsedArticle = ArticleParser.parse(unparsedArticle);
 
                 article.setBody(parsedArticle);
-
                 article.setCategory(portal.getCategoryFromUrl(article.getUrl()));
-
                 article.setPortal(portal.getName());
 
                 dataStore.addArticle(article);
@@ -103,7 +101,7 @@ public final class NewsDownloader {
 
     private Document getArticleDocument(PortalInfo portal, NewsArticle article) {
         try {
-            Connection connection = getConnection(portal.getURL() + article.getUrl());
+            final Connection connection = getConnection(portal.getURL() + article.getUrl());
             return connection.get();
         } catch (IOException e) {
             e.printStackTrace();
@@ -111,9 +109,9 @@ public final class NewsDownloader {
         }
     }
 
-    private String getTitle(Document artDOM) {
+    private String getTitle(final Document artDOM) {
         String title;
-        Elements metaOgTitle = artDOM.select("meta[property=og:title]");
+        final Elements metaOgTitle = artDOM.select("meta[property=og:title]");
         if (metaOgTitle != null) {
             title = metaOgTitle.attr("content");
         } else {
@@ -123,9 +121,9 @@ public final class NewsDownloader {
         //return title.split("|")[0].trim();
     }
 
-    private Document getPortalDocument(PortalInfo portal) {
+    private Document getPortalDocument(final PortalInfo portal) {
         try {
-            Connection connection = getConnection(portal.getArchiveURL());
+            final Connection connection = getConnection(portal.getArchiveURL());
             return connection.get();
         } catch (IOException e) {
             e.printStackTrace();

@@ -50,7 +50,7 @@ public final class NewsAnnotator {
         System.out.println();
         System.out.println(ANNOTATION_STARTED_STRING);
         for (NewsArticle article : articles) {
-            if (!article.hasSentiment() && ("DNEVNO".equals(article.getPortal()) || "Telegram".equals(article.getPortal()))) {
+            if (!article.hasSentiment() && ("vijesti".equals(categorizer.getCategory(article.getCategory())))) {
                 System.out.println(article.toString());
                 System.out.println(PLEASE_CHOOSE_STRING);
 

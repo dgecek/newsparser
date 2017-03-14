@@ -2,6 +2,7 @@ package hr.dgecek.newsparser;
 
 import hr.dgecek.newsparser.categorizer.Categorizer;
 import hr.dgecek.newsparser.entity.NewsArticle;
+import hr.dgecek.newsparser.sentimentfilter.SentimentFilter;
 import hr.dgecek.newsparser.stemmer.SCStemmer;
 import hr.dgecek.newsparser.stopwordremover.StopWordsRemover;
 
@@ -17,23 +18,30 @@ import static hr.dgecek.newsparser.NewsAnnotator.POSITIVE;
  * Created by dgecek on 17.12.16..
  */
 public final class FeaturesFormatter {
+
     private static final String TRAIN_PATH = "/home/dgecek/projects/intellij/annotatedNews/news.train";
     private static final String TEST_PATH = "/home/dgecek/projects/intellij/annotatedNews/news.test";
 
     private final List<String> legitSentiments;
     private final ArticleDAO datastore;
     private final SCStemmer stemmer;
-    final private StopWordsRemover stopWordsRemover;
-    final private Categorizer categorizer;
+    private final StopWordsRemover stopWordsRemover;
+    private final Categorizer categorizer;
+    private final NegationsManager negationsManager;
+    private final SentimentFilter sentimentFilter;
 
-    final private NegationsManager negationsManager;
-
-    public FeaturesFormatter(final ArticleDAO datastore, final SCStemmer stemmer, final StopWordsRemover stopWordsRemover, final Categorizer categorizer, final NegationsManager negationsManager) {
+    public FeaturesFormatter(final ArticleDAO datastore,
+                             final SCStemmer stemmer,
+                             final StopWordsRemover stopWordsRemover,
+                             final Categorizer categorizer,
+                             final NegationsManager negationsManager,
+                             final SentimentFilter sentimentFilter) {
         this.datastore = datastore;
         this.stemmer = stemmer;
         this.stopWordsRemover = stopWordsRemover;
         this.categorizer = categorizer;
         this.negationsManager = negationsManager;
+        this.sentimentFilter = sentimentFilter;
 
         legitSentiments = new ArrayList<>();
         legitSentiments.add(NewsAnnotator.NEUTRAL);
@@ -44,25 +52,25 @@ public final class FeaturesFormatter {
 
     public void saveToFile() throws IOException {
         final List<NewsArticle> news = datastore.getAll();
-        Collections.shuffle(news);
+        //Collections.shuffle(news);
 
         final BufferedWriter trainBufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(TRAIN_PATH))));
         final BufferedWriter testBufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(TEST_PATH))));
 
-        final ArrayList<String> stringsToWrite = new ArrayList<>(500);
+        final ArrayList<String> stringsToWrite = new ArrayList<>(1000);
 
         for (final NewsArticle newsArticle : news) {
-            if (legitSentiments.contains(newsArticle.getSentiment())) {
-                final String title = removeQuotes(format(newsArticle.getTitle()));
-                final String body = removeQuotes(format(newsArticle.getBody()));
-                final String category = categorizer.getCategory(newsArticle.getCategory());
+            if (legitSentiments.contains(newsArticle.getSentiment()) && "vijesti".equals(categorizer.getCategory(newsArticle.getCategory()))) {
+                final String title = filterSentiment(removeQuotes(format(newsArticle.getTitle())));
+                final String body = filterSentiment(removeQuotes(format(newsArticle.getBody())));
+                //final String category = categorizer.getCategory(newsArticle.getCategory());
                 //number of words
                 final String negations = negationsManager.getNegationsInArticle(title + " " + body);
-                final int testnum = newsArticle.getSentiment().equals(NEGATIVE) ? 0 : newsArticle.getSentiment().equals(POSITIVE) ? 1 : 2;
+                //final int testnum = newsArticle.getSentiment().equals(NEGATIVE) ? 0 : newsArticle.getSentiment().equals(POSITIVE) ? 1 : 2;
                 final float percentageOfNegations = ((float) negations.split(",").length - 1) / (float) (body.split(" ").length + title.split(" ").length);
 
                 final String stringToWrite = (newsArticle.getSentiment() + "\t" + title + "" +
-                        "\t" + body + "\t" + category + "\t" +
+                        "\t" + body + "\t" +
                         percentageOfNegations).toLowerCase();
                 stringsToWrite.add(stringToWrite);
             }
@@ -83,7 +91,12 @@ public final class FeaturesFormatter {
         testBufferedWriter.close();
     }
 
-    private String removeQuotes(String string) {
+    private String filterSentiment(final String string) {
+        final String newString = sentimentFilter.filter(string);
+        return newString;
+    }
+
+    private String removeQuotes(final String string) {
         String[] parts = string.split("\"|''|'|`");
         for (int i = 0; i < parts.length; i++) {
             //we only want to remove quotes
@@ -93,16 +106,16 @@ public final class FeaturesFormatter {
             }
         }
 
-        String newString = String.join("", (CharSequence[]) parts).replace("  ", " ");
+        final String newString = String.join("", (CharSequence[]) parts).replace("  ", " ");
         System.out.println(newString);
         return newString;
     }
 
-    private String format(String string) {
-        string = stopWordsRemover.removeStopWords(string);
-        string = stemmer.stemLine(string);
+    private String format(final String string) {
+        String newString = stopWordsRemover.removeStopWords(string);
+        newString = stemmer.stemLine(newString);
 
-        string = string.replace("\t", " ")
+        newString = newString.replace("\t", " ")
                 .replace("\n", " ")
                 .replace(".", " .")
                 .replace("?", " ?")
@@ -115,10 +128,9 @@ public final class FeaturesFormatter {
                 .replace("  ", " ");
 
         //remove every sentence that has " or rekl, kaž,...
-        //what about words that start with pre, razdvoji
+        //what about words that start with pre, razdvoji?
 
-
-        return string;
+        return newString;
     }
 
     public void proba() {
