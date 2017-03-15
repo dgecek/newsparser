@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static hr.dgecek.newsparser.NewsAnnotator.NEGATIVE;
+import static hr.dgecek.newsparser.NewsAnnotator.NEUTRAL;
 import static hr.dgecek.newsparser.NewsAnnotator.POSITIVE;
 
 /**
@@ -29,6 +30,7 @@ public final class FeaturesFormatter {
     private final Categorizer categorizer;
     private final NegationsManager negationsManager;
     private final SentimentFilter sentimentFilter;
+    private final Statistics statistics = new Statistics();
 
     public FeaturesFormatter(final ArticleDAO datastore,
                              final SCStemmer stemmer,
@@ -60,8 +62,9 @@ public final class FeaturesFormatter {
         final ArrayList<String> stringsToWrite = new ArrayList<>(1000);
 
         for (final NewsArticle newsArticle : news) {
-            if (legitSentiments.contains(newsArticle.getSentiment()) && "vijesti".equals(categorizer.getCategory(newsArticle.getCategory()))) {
-                final String title = filterSentiment(removeQuotes(format(newsArticle.getTitle())));
+            //number of positive/negative sentiment words?
+            if (legitSentiments.contains(newsArticle.getSentiment())) {//&& "vijesti".equals(categorizer.getCategory(newsArticle.getCategory()))) { //&& "vijesti".equals(categorizer.getCategory(newsArticle.getCategory())
+                final String title = (removeQuotes(format(newsArticle.getTitle())));
                 final String body = filterSentiment(removeQuotes(format(newsArticle.getBody())));
                 //final String category = categorizer.getCategory(newsArticle.getCategory());
                 //number of words
@@ -69,6 +72,7 @@ public final class FeaturesFormatter {
                 //final int testnum = newsArticle.getSentiment().equals(NEGATIVE) ? 0 : newsArticle.getSentiment().equals(POSITIVE) ? 1 : 2;
                 final float percentageOfNegations = ((float) negations.split(",").length - 1) / (float) (body.split(" ").length + title.split(" ").length);
 
+                statistics.increaseCounter(newsArticle.getSentiment());
                 final String stringToWrite = (newsArticle.getSentiment() + "\t" + title + "" +
                         "\t" + body + "\t" +
                         percentageOfNegations).toLowerCase();
@@ -89,6 +93,8 @@ public final class FeaturesFormatter {
 
         trainBufferedWriter.close();
         testBufferedWriter.close();
+
+        System.out.println(statistics.toString());
     }
 
     private String filterSentiment(final String string) {
@@ -137,5 +143,36 @@ public final class FeaturesFormatter {
         String probni = "Francuska predsjednička kandidatkinja i liderica stranke krajnje desnice Marine Le Pen pozvala je na okončanje besplatnog obrazovanja za djecu stranaca, javlja BBC. Le Pen je u svom govoru u Parizu rekla kako zapravo nema ništa protiv stranaca. \"Ali ja im kažem, ako ste došli u našu zemlju, nemojte očekivati da ćete biti zbrinuti i da će vaša djeca biti educirana bez naknade,\" rekla je Le Pen koja je liderica Nacionalne fronte.";
         System.out.println(probni);
         removeQuotes(format(probni));
+    }
+
+    private static class Statistics {
+        private int numOfNegatives = 0;
+        private int numOfPositives = 0;
+        private int numOfNeutrals = 0;
+
+        void increaseCounter(final String sentiment) {
+            switch (sentiment) {
+                case NewsAnnotator.NEGATIVE:
+                    numOfNegatives++;
+                    break;
+                case NewsAnnotator.POSITIVE:
+                    numOfPositives++;
+                    break;
+                case NewsAnnotator.NEUTRAL:
+                    numOfNeutrals++;
+                    break;
+                default:
+                    throw new IllegalArgumentException();
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "Statistics{" +
+                    "numOfNegatives=" + numOfNegatives +
+                    ", numOfPositives=" + numOfPositives +
+                    ", numOfNeutrals=" + numOfNeutrals +
+                    '}';
+        }
     }
 }

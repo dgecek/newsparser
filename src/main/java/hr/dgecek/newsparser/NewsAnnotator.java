@@ -44,12 +44,12 @@ public final class NewsAnnotator {
     }
 
     public void startUserAnnotation() {
-        List<NewsArticle> articles = datastore.getAll();
+        final List<NewsArticle> articles = datastore.getAll();
         Collections.shuffle(articles);
 
         System.out.println();
         System.out.println(ANNOTATION_STARTED_STRING);
-        for (NewsArticle article : articles) {
+        for (final NewsArticle article : articles) {
             if (!article.hasSentiment() && ("vijesti".equals(categorizer.getCategory(article.getCategory())))) {
                 System.out.println(article.toString());
                 System.out.println(PLEASE_CHOOSE_STRING);

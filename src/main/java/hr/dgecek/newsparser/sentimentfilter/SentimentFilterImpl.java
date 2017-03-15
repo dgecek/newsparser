@@ -13,7 +13,7 @@ import java.util.List;
  */
 public final class SentimentFilterImpl implements SentimentFilter {
 
-    private static final float MINIMUM_WEIGHT = 0.5f;
+    private static final float MINIMUM_WEIGHT = 0.0f;
     private static final String POSITIVES_PATH = "/home/dgecek/projects/intellij/annotatedNews/crosentilex-positives.txt";
     private static final String NEGATIVES_PATH = "/home/dgecek/projects/intellij/annotatedNews/crosentilex-negatives.txt";
 
