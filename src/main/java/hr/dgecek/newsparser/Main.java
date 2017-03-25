@@ -33,7 +33,7 @@ public final class Main {
         final DataClassifier dataClassifier = new DataClassifier();
 
         //downloader.downloadNews();
-        // annotator.startUserAnnotation();
+        //annotator.startUserAnnotation();
         featuresFormatter.saveToFile();
 
         dataClassifier.clasify();

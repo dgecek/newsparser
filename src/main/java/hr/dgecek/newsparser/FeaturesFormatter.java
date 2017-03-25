@@ -7,9 +7,7 @@ import hr.dgecek.newsparser.stemmer.SCStemmer;
 import hr.dgecek.newsparser.stopwordremover.StopWordsRemover;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static hr.dgecek.newsparser.NewsAnnotator.NEGATIVE;
 import static hr.dgecek.newsparser.NewsAnnotator.NEUTRAL;
@@ -22,6 +20,7 @@ public final class FeaturesFormatter {
 
     private static final String TRAIN_PATH = "/home/dgecek/projects/intellij/annotatedNews/news.train";
     private static final String TEST_PATH = "/home/dgecek/projects/intellij/annotatedNews/news.test";
+    public static final float PERCENTAGE_FOR_TRAINING = 0.7f;
 
     private final List<String> legitSentiments;
     private final ArticleDAO datastore;
@@ -46,33 +45,51 @@ public final class FeaturesFormatter {
         this.sentimentFilter = sentimentFilter;
 
         legitSentiments = new ArrayList<>();
-        legitSentiments.add(NewsAnnotator.NEUTRAL);
+        legitSentiments.add(NEUTRAL);
         legitSentiments.add(NEGATIVE);
-        legitSentiments.add(NewsAnnotator.POSITIVE);
+        legitSentiments.add(POSITIVE);
     }
 
 
     public void saveToFile() throws IOException {
         final List<NewsArticle> news = datastore.getAll();
-        //Collections.shuffle(news);
+        Collections.shuffle(news);
+
+        //test
+        /*Collections.sort(news, (o1, o2) -> {
+                    final boolean firstIsNews = "vijesti".equals(categorizer.getCategory(o1.getCategory()));
+                    final boolean secondIsNews = "vijesti".equals(categorizer.getCategory(o2.getCategory()));
+
+                    if (firstIsNews && secondIsNews) {
+                        return 0;
+                    } else if (firstIsNews) {
+                        return 1;
+                    } else {
+                        return -1;
+                    }
+
+                }
+        );*/
 
         final BufferedWriter trainBufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(TRAIN_PATH))));
         final BufferedWriter testBufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(TEST_PATH))));
 
-        final ArrayList<String> stringsToWrite = new ArrayList<>(1000);
+        final ArrayList<String> stringsToWrite = new ArrayList<>(1500);
 
         for (final NewsArticle newsArticle : news) {
             //number of positive/negative sentiment words?
-            if (legitSentiments.contains(newsArticle.getSentiment())) {//&& "vijesti".equals(categorizer.getCategory(newsArticle.getCategory()))) { //&& "vijesti".equals(categorizer.getCategory(newsArticle.getCategory())
+            if (legitSentiments.contains(newsArticle.getSentiment())) {  // && "vijesti".equals(categorizer.getCategory(newsArticle.getCategory()))) {
                 final String title = (removeQuotes(format(newsArticle.getTitle())));
                 final String body = filterSentiment(removeQuotes(format(newsArticle.getBody())));
                 //final String category = categorizer.getCategory(newsArticle.getCategory());
                 //number of words
                 final String negations = negationsManager.getNegationsInArticle(title + " " + body);
-                //final int testnum = newsArticle.getSentiment().equals(NEGATIVE) ? 0 : newsArticle.getSentiment().equals(POSITIVE) ? 1 : 2;
-                final float percentageOfNegations = ((float) negations.split(",").length - 1) / (float) (body.split(" ").length + title.split(" ").length);
+
+                final float numOfNegations = (float) negations.split(",").length - 1;
+                final float percentageOfNegations = numOfNegations / (float) (body.split(" ").length + title.split(" ").length);
 
                 statistics.increaseCounter(newsArticle.getSentiment());
+
                 final String stringToWrite = (newsArticle.getSentiment() + "\t" + title + "" +
                         "\t" + body + "\t" +
                         percentageOfNegations).toLowerCase();
@@ -82,7 +99,7 @@ public final class FeaturesFormatter {
 
         for (int i = 0; i < stringsToWrite.size(); i++) {
             final String stringToWrite = stringsToWrite.get(i);
-            if (((float) i / (float) stringsToWrite.size()) <= 0.7f) {
+            if (((float) i / (float) stringsToWrite.size()) <= PERCENTAGE_FOR_TRAINING) {
                 trainBufferedWriter.write(stringToWrite);
                 trainBufferedWriter.newLine();
             } else {
@@ -103,7 +120,7 @@ public final class FeaturesFormatter {
     }
 
     private String removeQuotes(final String string) {
-        String[] parts = string.split("\"|''|'|`");
+        final String[] parts = string.split("\"|''|'|`");
         for (int i = 0; i < parts.length; i++) {
             //we only want to remove quotes
 
@@ -113,15 +130,43 @@ public final class FeaturesFormatter {
         }
 
         final String newString = String.join("", (CharSequence[]) parts).replace("  ", " ");
-        System.out.println(newString);
+        //System.out.println(newString);
         return newString;
     }
 
     private String format(final String string) {
         String newString = stopWordsRemover.removeStopWords(string);
         newString = stemmer.stemLine(newString);
+        newString = formatInterpunction(newString);
+        //newString = removeInterpunction(newString);
 
-        newString = newString.replace("\t", " ")
+
+        //polozaj recenice u tekstu?
+        //remove all names?
+        //remove every sentence that has " or rekl, kaž,... dvotocka
+        //what about words that start with pre, razdvoji?
+
+        return newString;
+    }
+
+    private String removeInterpunction(final String string) {
+        final String newString = string.replace("\t", "")
+                .replace("\n", "")
+                .replace(".", "")
+                .replace("?", "")
+                .replace("!", "")
+                .replace(",", "")
+                .replace(":", "")
+                .replace(";", "")
+                .replace("'", "")
+                .replace("\"", "")
+                .replace("  ", "");
+
+        return newString;
+    }
+
+    private String formatInterpunction(final String string) {
+        String newString = string.replace("\t", " ")
                 .replace("\n", " ")
                 .replace(".", " .")
                 .replace("?", " ?")
@@ -133,16 +178,7 @@ public final class FeaturesFormatter {
                 .replace("\"", " \" ")
                 .replace("  ", " ");
 
-        //remove every sentence that has " or rekl, kaž,...
-        //what about words that start with pre, razdvoji?
-
         return newString;
-    }
-
-    public void proba() {
-        String probni = "Francuska predsjednička kandidatkinja i liderica stranke krajnje desnice Marine Le Pen pozvala je na okončanje besplatnog obrazovanja za djecu stranaca, javlja BBC. Le Pen je u svom govoru u Parizu rekla kako zapravo nema ništa protiv stranaca. \"Ali ja im kažem, ako ste došli u našu zemlju, nemojte očekivati da ćete biti zbrinuti i da će vaša djeca biti educirana bez naknade,\" rekla je Le Pen koja je liderica Nacionalne fronte.";
-        System.out.println(probni);
-        removeQuotes(format(probni));
     }
 
     private static class Statistics {
@@ -172,6 +208,7 @@ public final class FeaturesFormatter {
                     "numOfNegatives=" + numOfNegatives +
                     ", numOfPositives=" + numOfPositives +
                     ", numOfNeutrals=" + numOfNeutrals +
+                    ", sum=" + (numOfNeutrals + numOfPositives + numOfNegatives) +
                     '}';
         }
     }

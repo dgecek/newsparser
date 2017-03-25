@@ -33,7 +33,7 @@ public final class DnevnoHrInfo implements PortalInfo {
     }
 
     @Override
-    public String getCategoryFromUrl(String url) {
+    public String getCategoryFromUrl(final String url) {
         try {
             return url.split("http://www\\.dnevno\\.hr/")[1].split("/")[0];
         } catch (ArrayIndexOutOfBoundsException e) {

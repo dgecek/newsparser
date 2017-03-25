@@ -13,7 +13,7 @@ import java.util.List;
  */
 public final class SentimentFilterImpl implements SentimentFilter {
 
-    private static final float MINIMUM_WEIGHT = 0.0f;
+    private static final float MINIMUM_WEIGHT = 0.20f;
     private static final String POSITIVES_PATH = "/home/dgecek/projects/intellij/annotatedNews/crosentilex-positives.txt";
     private static final String NEGATIVES_PATH = "/home/dgecek/projects/intellij/annotatedNews/crosentilex-negatives.txt";
 
@@ -55,6 +55,7 @@ public final class SentimentFilterImpl implements SentimentFilter {
     public String filter(final String string) {
         final String[] sentences = string.split("\\.|!|\\?");
 
+        int numOfErasedSentences = 0;
         sentenceLoop:
         for (int i = 0; i < sentences.length; i++) {
             String sentence = sentences[i];
@@ -65,7 +66,11 @@ public final class SentimentFilterImpl implements SentimentFilter {
                 }
             }
             sentences[i] = "";
+            numOfErasedSentences++;
         }
+        //System.out.println("numOfErasedSentences: " + numOfErasedSentences);
+        //TODO dot, reallyyy?3
+
         return String.join(". ", Arrays.asList(sentences));
     }
 }

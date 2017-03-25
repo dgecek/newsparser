@@ -6,8 +6,7 @@ import java.util.Map;
 public final class CategorizerImpl implements Categorizer {
     final private Map<String, String> categories = new HashMap<>();
 
-   /* vijesti:vijesti:politika-kriminal:globus:biznis
-    kolumnisti
+   /* vijesti:vijesti:politika-kriminal:globus:biznis:kolumnisti
     reality:spektakli:rouge:black
     mame
     sport:sport

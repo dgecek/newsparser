@@ -8,13 +8,13 @@ import java.util.List;
 /**
  * Created by dgecek on 23.12.16..
  */
-public class StopWordsRemoverImpl implements StopWordsRemover {
+public final class StopWordsRemoverImpl implements StopWordsRemover {
 
     private static final String PATH = "/home/dgecek/projects/intellij/annotatedNews/stopwords.txt";
     private final List<String> stopWords;
 
     public StopWordsRemoverImpl() {
-        this.stopWords = new ArrayList<String>();
+        this.stopWords = new ArrayList<>(200);
         fillStopWords();
     }
 
@@ -30,7 +30,7 @@ public class StopWordsRemoverImpl implements StopWordsRemover {
     }
 
     @Override
-    public String removeStopWords(String string) {
+    public String removeStopWords(final String string) {
         final String[] words = string.split(" ");
         for (int i = 0; i< words.length; i++) {
             if(stopWords.contains(words[i])){
