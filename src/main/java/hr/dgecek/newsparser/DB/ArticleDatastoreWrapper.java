@@ -11,6 +11,7 @@ import java.util.List;
  * Created by dgecek on 16.11.16..
  */
 public final class ArticleDatastoreWrapper implements ArticleDAO {
+
     public static final String SAVING_STRING = "saving...";
     public static final String NOT_AN_ARTICLE_STRING = "Not an article. Not saving.";
     public static final String DUPLICATE_STRING = "Duplicate. Not saving.";

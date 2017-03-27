@@ -18,8 +18,8 @@ import static hr.dgecek.newsparser.NewsAnnotator.POSITIVE;
  */
 public final class FeaturesFormatter {
 
-    private static final String TRAIN_PATH = "/home/dgecek/projects/intellij/annotatedNews/news.train";
-    private static final String TEST_PATH = "/home/dgecek/projects/intellij/annotatedNews/news.test";
+    public static final String TRAIN_PATH = "/home/dgecek/projects/intellij/annotatedNews/news.train";
+    public static final String TEST_PATH = "/home/dgecek/projects/intellij/annotatedNews/news.test";
     public static final float PERCENTAGE_FOR_TRAINING = 0.7f;
 
     private final List<String> legitSentiments;
@@ -51,7 +51,7 @@ public final class FeaturesFormatter {
     }
 
 
-    public void saveToFile() throws IOException {
+    public void saveTrainingAndTestSetsToFile() throws IOException {
         final List<NewsArticle> news = datastore.getAll();
         Collections.shuffle(news);
 
@@ -79,20 +79,7 @@ public final class FeaturesFormatter {
         for (final NewsArticle newsArticle : news) {
             //number of positive/negative sentiment words?
             if (legitSentiments.contains(newsArticle.getSentiment())) {  // && "vijesti".equals(categorizer.getCategory(newsArticle.getCategory()))) {
-                final String title = (removeQuotes(format(newsArticle.getTitle())));
-                final String body = filterSentiment(removeQuotes(format(newsArticle.getBody())));
-                //final String category = categorizer.getCategory(newsArticle.getCategory());
-                //number of words
-                final String negations = negationsManager.getNegationsInArticle(title + " " + body);
-
-                final float numOfNegations = (float) negations.split(",").length - 1;
-                final float percentageOfNegations = numOfNegations / (float) (body.split(" ").length + title.split(" ").length);
-
-                statistics.increaseCounter(newsArticle.getSentiment());
-
-                final String stringToWrite = (newsArticle.getSentiment() + "\t" + title + "" +
-                        "\t" + body + "\t" +
-                        percentageOfNegations).toLowerCase();
+                final String stringToWrite = getStringToWrite(newsArticle);
                 stringsToWrite.add(stringToWrite);
             }
         }
@@ -112,6 +99,30 @@ public final class FeaturesFormatter {
         testBufferedWriter.close();
 
         System.out.println(statistics.toString());
+    }
+
+    public Map<NewsArticle, String> getFeaturesLinesForNonAnottatedArticles(){
+        //TODO
+        return null;
+    }
+
+    private String getStringToWrite(final NewsArticle newsArticle) {
+        final String title = (removeQuotes(format(newsArticle.getTitle())));
+        final String body = filterSentiment(removeQuotes(format(newsArticle.getBody())));
+        //final String category = categorizer.getCategory(newsArticle.getCategory());
+        //number of words
+        final String negations = negationsManager.getNegationsInArticle(title + " " + body);
+
+        final float numOfNegations = (float) negations.split(",").length - 1;
+        final float percentageOfNegations = numOfNegations / (float) (body.split(" ").length + title.split(" ").length);
+
+        statistics.increaseCounter(newsArticle.getSentiment());
+
+        final String stringToWrite = (newsArticle.getSentiment() + "\t" + title + "" +
+                "\t" + body + "\t" +
+                percentageOfNegations).toLowerCase();
+
+        return stringToWrite;
     }
 
     private String filterSentiment(final String string) {

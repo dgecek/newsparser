@@ -34,7 +34,7 @@ public final class Main {
 
         //downloader.downloadNews();
         //annotator.startUserAnnotation();
-        featuresFormatter.saveToFile();
+        featuresFormatter.saveTrainingAndTestSetsToFile();
 
         dataClassifier.classify();
     }
