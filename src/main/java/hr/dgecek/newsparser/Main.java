@@ -30,12 +30,12 @@ public final class Main {
         final NegationsManager negationsManager = new NegationsManager();
         final SentimentFilter sentimentFilter = new SentimentFilterImpl(stemmer);
         final FeaturesFormatter featuresFormatter = new FeaturesFormatter(datastore, stemmer, stopWordsRemover, categorizer, negationsManager, sentimentFilter);
-        final DataClassifier dataClassifier = new DataClassifier();
+        final DataClassifier dataClassifier = new DataClassifier(datastore);
 
         //downloader.downloadNews();
         //annotator.startUserAnnotation();
         featuresFormatter.saveToFile();
 
-        dataClassifier.clasify();
+        dataClassifier.classify();
     }
 }
