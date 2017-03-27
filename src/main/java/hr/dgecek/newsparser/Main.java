@@ -3,6 +3,8 @@ package hr.dgecek.newsparser;
 import hr.dgecek.newsparser.DB.MorphiaManager;
 import hr.dgecek.newsparser.categorizer.Categorizer;
 import hr.dgecek.newsparser.categorizer.CategorizerImpl;
+import hr.dgecek.newsparser.date.DateProvider;
+import hr.dgecek.newsparser.date.DateProviderImpl;
 import hr.dgecek.newsparser.sentimentfilter.SentimentFilter;
 import hr.dgecek.newsparser.sentimentfilter.SentimentFilterImpl;
 import hr.dgecek.newsparser.stemmer.LjubesicPandzicStemmer;
@@ -20,22 +22,21 @@ public final class Main {
     private static final long TIME_BETWEEN_DOWNLOADING = 10 * 60 * 1000;
 
     public static void main(final String[] args) throws IOException, InterruptedException {
-
-        final ArticleDAO datastore = MorphiaManager.getDataStore();
+        final DateProvider dateProvider = new DateProviderImpl();
+        final ArticleDAO datastore = MorphiaManager.getDataStore(dateProvider);
         final SCStemmer stemmer = new LjubesicPandzicStemmer();
         final StopWordsRemover stopWordsRemover = new StopWordsRemoverImpl();
         final Categorizer categorizer = new CategorizerImpl();
-        final NewsDownloader downloader = new NewsDownloader(datastore);
+        final NewsDownloader downloader = new NewsDownloader(datastore, dateProvider);
         final NewsAnnotator annotator = new NewsAnnotator(datastore, categorizer);
         final NegationsManager negationsManager = new NegationsManager();
         final SentimentFilter sentimentFilter = new SentimentFilterImpl(stemmer);
         final FeaturesFormatter featuresFormatter = new FeaturesFormatter(datastore, stemmer, stopWordsRemover, categorizer, negationsManager, sentimentFilter);
         final DataClassifier dataClassifier = new DataClassifier();
 
-        //downloader.downloadNews();
+        downloader.downloadNews();
         //annotator.startUserAnnotation();
-        featuresFormatter.saveToFile();
-
-        dataClassifier.clasify();
+        //featuresFormatter.saveToFile();
+        //dataClassifier.clasify();
     }
 }

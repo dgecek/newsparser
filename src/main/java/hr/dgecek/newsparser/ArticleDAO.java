@@ -16,4 +16,6 @@ public interface ArticleDAO {
     String getStatistics();
 
     void update(NewsArticle article);
+
+    List<NewsArticle> getRecentArticles();
 }

@@ -117,6 +117,7 @@ public final class FeaturesFormatter {
     private String filterSentiment(final String string) {
         final String newString = sentimentFilter.filter(string);
         return newString;
+        //return string;
     }
 
     private String removeQuotes(final String string) {

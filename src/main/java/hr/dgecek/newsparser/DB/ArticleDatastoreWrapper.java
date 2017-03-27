@@ -2,6 +2,7 @@ package hr.dgecek.newsparser.DB;
 
 import com.mongodb.DuplicateKeyException;
 import hr.dgecek.newsparser.ArticleDAO;
+import hr.dgecek.newsparser.date.DateProvider;
 import hr.dgecek.newsparser.entity.NewsArticle;
 import org.mongodb.morphia.Datastore;
 
@@ -11,15 +12,21 @@ import java.util.List;
  * Created by dgecek on 16.11.16..
  */
 public final class ArticleDatastoreWrapper implements ArticleDAO {
+
     public static final String SAVING_STRING = "saving...";
     public static final String NOT_AN_ARTICLE_STRING = "Not an article. Not saving.";
     public static final String DUPLICATE_STRING = "Duplicate. Not saving.";
     public static final String DONE_STRING = "Done";
+    public static final int RECENT_DAYS = 3;
+
     private final Datastore dataStore;
     private final DataStoreStatistics statistics = new DataStoreStatistics();
+    private final DateProvider dateProvider;
 
-    public ArticleDatastoreWrapper(final Datastore datastore) {
+    public ArticleDatastoreWrapper(final Datastore datastore,
+                                   final DateProvider dateProvider) {
         this.dataStore = datastore;
+        this.dateProvider = dateProvider;
     }
 
     @Override
@@ -53,6 +60,13 @@ public final class ArticleDatastoreWrapper implements ArticleDAO {
     @Override
     public void update(final NewsArticle article) {
         dataStore.save(article);
+    }
+
+    @Override
+    public List<NewsArticle> getRecentArticles() {
+        return dataStore.find(NewsArticle.class)
+                .field("date").greaterThan(dateProvider.getDateNumberOfDaysAgo(RECENT_DAYS))
+                .asList();
     }
 
     @Override

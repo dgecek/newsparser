@@ -1,6 +1,7 @@
 package hr.dgecek.newsparser.DB;
 
 import com.mongodb.MongoClient;
+import hr.dgecek.newsparser.date.DateProvider;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
 
@@ -14,7 +15,7 @@ public final class MorphiaManager {
 
     private static ArticleDatastoreWrapper datastoreInstance;
 
-    public static ArticleDatastoreWrapper getDataStore() {
+    public static ArticleDatastoreWrapper getDataStore(final DateProvider dateProvider) {
         if(datastoreInstance == null) {
             final Morphia morphia = new Morphia();
 
@@ -26,7 +27,7 @@ public final class MorphiaManager {
             final Datastore datastore = morphia.createDatastore(new MongoClient(), DB_NAME);
             datastore.ensureIndexes();
 
-            datastoreInstance = new ArticleDatastoreWrapper(datastore);
+            datastoreInstance = new ArticleDatastoreWrapper(datastore, dateProvider);
         }
 
         return datastoreInstance;

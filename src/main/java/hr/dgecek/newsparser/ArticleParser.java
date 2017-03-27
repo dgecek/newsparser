@@ -6,7 +6,9 @@ import org.jsoup.Jsoup;
  * Created by dgecek on 01.11.16..
  */
 public final class ArticleParser {
+
     public static String parse(String unparsedArticle) {
+
         unparsedArticle = unparsedArticle.replace("<br>", "").replace("<strong>", "").replace("</strong>", "").replace("<em>", "").replace("</em>", "")
                 .replace("<section class=\"articleBody\">", "");
 

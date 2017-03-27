@@ -4,23 +4,53 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.*;
 import org.mongodb.morphia.utils.IndexDirection;
 
+import java.util.Date;
+
 /**
  * Created by dgecek on 27.10.16..
  */
 
 @Entity("newsarticles")
 public class NewsArticle {
+
     @Id
     private ObjectId id;
 
     private String title;
     private String body;
 
-    @Indexed(value= IndexDirection.ASC, name="url_unique", unique=true, dropDups=true)
+    @Indexed(value = IndexDirection.ASC, name = "url_unique", unique = true, dropDups = true)
     private String url;     //another id
     private String category;
     private String portal;
     private String sentiment;
+    private String predictedSentiment;
+    private Date date;
+    private String urlToImage;
+
+    public String getUrlToImage() {
+        return urlToImage;
+    }
+
+    public void setUrlToImage(String urlToImage) {
+        this.urlToImage = urlToImage;
+    }
+
+    public String getPredictedSentiment() {
+        return predictedSentiment;
+    }
+
+    public void setPredictedSentiment(String predictedSentiment) {
+        this.predictedSentiment = predictedSentiment;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
 
     public ObjectId getId() {
         return id;
@@ -74,7 +104,7 @@ public class NewsArticle {
         return sentiment;
     }
 
-    public boolean hasSentiment(){
+    public boolean hasSentiment() {
         return sentiment != null && !sentiment.equals("");
     }
 
@@ -87,10 +117,13 @@ public class NewsArticle {
         return "NewsArticle{" +
                 "\ntitle='" + title + '\'' +
                 ", \nurl='" + url + '\'' +
+                "\nurlToImage=" + urlToImage + "\n" +
                 ", \ncategory='" + category + '\'' +
                 ", \nportal='" + portal + '\'' +
-                ", \nbody='" + body.replace(".", ".\n" +
-                "") + '\'' +
+                ", \nsentiment='" + sentiment + '\'' +
+                ", \npredictedSentiment='" + predictedSentiment + '\'' +
+                ", \ndate=" + date +
+                ", \nbody='" + body.replace(".", ".\n") + '\'' +
                 '}';
     }
 }
