@@ -11,6 +11,7 @@ import java.util.List;
 public final class StopWordsRemoverImpl implements StopWordsRemover {
 
     private static final String PATH = "/home/dgecek/projects/intellij/annotatedNews/stopwords.txt";
+
     private final List<String> stopWords;
 
     public StopWordsRemoverImpl() {

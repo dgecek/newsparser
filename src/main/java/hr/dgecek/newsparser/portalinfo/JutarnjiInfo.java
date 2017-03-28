@@ -1,13 +1,14 @@
 package hr.dgecek.newsparser.portalinfo;
 
-import javax.sound.sampled.Port;
 import java.util.regex.Pattern;
 
 /**
  * Created by dgecek on 15.11.16..
  */
 public final class JutarnjiInfo implements PortalInfo {
-    private String urlPattern = "http://www\\.jutarnji\\.hr/.+/.+/\\w+-\\w+-.+/\\d+/";
+
+    private static final String URL_PATTERN = "http://www\\.jutarnji\\.hr/.+/.+/\\w+-\\w+-.+/\\d+/";
+    private static final String PORTAL_NAME = "Jutarnji";
 
     @Override
     public String getURL() {
@@ -15,9 +16,9 @@ public final class JutarnjiInfo implements PortalInfo {
     }
 
     @Override
-    public boolean checkNewsURLRegex(String url) {
+    public boolean checkNewsURLRegex(final String url) {
         //http://www.jutarnji.hr/vijesti/svijet/iracki-obavjestajci-i-isis-ovi-zarobljenici-detaljno-opisali-sto-se-danas-dogada-unutar-opkoljenog-grada/5272487/
-        Pattern pattern = java.util.regex.Pattern.compile(urlPattern);
+        final Pattern pattern = java.util.regex.Pattern.compile(URL_PATTERN);
         boolean b = pattern.matcher(url).matches();
         return b;
     }
@@ -33,16 +34,16 @@ public final class JutarnjiInfo implements PortalInfo {
     }
 
     @Override
-    public String getCategoryFromUrl(String url) {
+    public String getCategoryFromUrl(final String url) {
         try {
             return url.split("http://www\\.jutarnji\\.hr/")[1].split("/")[0];
-        } catch(ArrayIndexOutOfBoundsException e){
+        } catch(final ArrayIndexOutOfBoundsException e){
             return null;
         }
     }
 
     @Override
     public String getName() {
-        return "Jutarnji";
+        return PORTAL_NAME;
     }
 }

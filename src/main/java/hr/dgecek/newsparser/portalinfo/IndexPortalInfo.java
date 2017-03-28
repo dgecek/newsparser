@@ -7,8 +7,8 @@ import java.util.regex.Pattern;
  */
 public final class IndexPortalInfo implements PortalInfo {
 
-    private static final String urlPattern = "clanak\\.aspx\\?category=\\w+&id=\\w+";
-    public static final String INDEX = "Index";
+    private static final String URL_PATTERN = "clanak\\.aspx\\?category=\\w+&id=\\w+";
+    private static final String PORTAL_NAME = "Index";
     //example: clanak.aspx?category=sport&id=929321
 
     @Override
@@ -17,8 +17,8 @@ public final class IndexPortalInfo implements PortalInfo {
     }
 
     @Override
-    public boolean checkNewsURLRegex(String url) {
-        Pattern pattern = java.util.regex.Pattern.compile(urlPattern);
+    public boolean checkNewsURLRegex(final String url) {
+        Pattern pattern = java.util.regex.Pattern.compile(URL_PATTERN);
         return pattern.matcher(url).matches();
     }
 
@@ -33,7 +33,7 @@ public final class IndexPortalInfo implements PortalInfo {
     }
 
     @Override
-    public String getCategoryFromUrl(String url) {
+    public String getCategoryFromUrl(final String url) {
         //clanak.aspx?category=vijesti&id=931228
         try {
             return url.split("category=")[1].split("&")[0];
@@ -44,6 +44,6 @@ public final class IndexPortalInfo implements PortalInfo {
 
     @Override
     public String getName() {
-        return INDEX;
+        return PORTAL_NAME;
     }
 }

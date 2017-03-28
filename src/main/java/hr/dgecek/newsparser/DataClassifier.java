@@ -4,6 +4,7 @@ import edu.stanford.nlp.classify.Classifier;
 import edu.stanford.nlp.classify.ColumnDataClassifier;
 import edu.stanford.nlp.ling.Datum;
 import edu.stanford.nlp.objectbank.ObjectBank;
+import hr.dgecek.newsparser.DB.ArticleRepository;
 
 import java.io.IOException;
 
@@ -14,7 +15,7 @@ public final class DataClassifier {
     public static final String TEST_SET_PATH = "/home/dgecek/projects/intellij/annotatedNews/news.test";
     public static final String ENCODING = "utf-8";
 
-    public DataClassifier(final ArticleDAO datastore) {
+    public DataClassifier(final ArticleRepository datastore) {
 
     }
 

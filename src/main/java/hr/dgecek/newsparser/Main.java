@@ -1,5 +1,6 @@
 package hr.dgecek.newsparser;
 
+import hr.dgecek.newsparser.DB.ArticleRepository;
 import hr.dgecek.newsparser.DB.MorphiaManager;
 import hr.dgecek.newsparser.categorizer.Categorizer;
 import hr.dgecek.newsparser.categorizer.CategorizerImpl;
@@ -23,7 +24,7 @@ public final class Main {
 
     public static void main(final String[] args) throws IOException, InterruptedException {
         final DateProvider dateProvider = new DateProviderImpl();
-        final ArticleDAO datastore = MorphiaManager.getDataStore(dateProvider);
+        final ArticleRepository datastore = MorphiaManager.getDataStore(dateProvider);
         final SCStemmer stemmer = new LjubesicPandzicStemmer();
         final StopWordsRemover stopWordsRemover = new StopWordsRemoverImpl();
         final Categorizer categorizer = new CategorizerImpl();

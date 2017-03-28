@@ -6,8 +6,9 @@ import java.util.regex.Pattern;
  * Created by dgecek on 10.11.16..
  */
 public final class TelegramPortalInfo implements PortalInfo {
-    private static final String TELEGRAM = "Telegram";
-    private static final String urlPattern = "http://www\\.telegram\\.hr/.+/.+-.+-.+/";
+
+    private static final String PORTAL_NAME = "Telegram";
+    private static final String URL_PATTERN = "http://www\\.telegram\\.hr/.+/.+-.+-.+/";
 
     @Override
     public String getURL() {
@@ -17,7 +18,7 @@ public final class TelegramPortalInfo implements PortalInfo {
     @Override
     public boolean checkNewsURLRegex(String url) {
         //http://www.telegram.hr/politika-kriminal/gradonacelnik-dakova-sazvao-je-presicu-da-bi-pokusao-demantirati-telegram-a-onda-nam-je-blago-prijetio/
-        Pattern pattern = java.util.regex.Pattern.compile(urlPattern);
+        Pattern pattern = java.util.regex.Pattern.compile(URL_PATTERN);
         boolean b = pattern.matcher(url).matches();
         return b && !getCategoryFromUrl(url).equals("tema");
     }
@@ -46,6 +47,6 @@ public final class TelegramPortalInfo implements PortalInfo {
 
     @Override
     public String getName() {
-        return TELEGRAM;
+        return PORTAL_NAME;
     }
 }

@@ -1,5 +1,6 @@
 package hr.dgecek.newsparser;
 
+import hr.dgecek.newsparser.DB.ArticleRepository;
 import hr.dgecek.newsparser.date.DateProvider;
 import hr.dgecek.newsparser.entity.NewsArticle;
 import hr.dgecek.newsparser.portalinfo.*;
@@ -18,18 +19,23 @@ import java.util.Optional;
  * Created by dgecek on 27.10.16..
  */
 public final class NewsDownloader {
-    public static final String LINKS_SELECTOR = "a[href]";
-    public static final String HREF_SELECTOR = "href";
-    public static final String IMG_TAG = "img";
-    public static final String SRC_ATTR = "src";
 
-    public static final int CONNECTION_TIMEOUT = 5000;
-    public static final int WAIT_BEFORE_NEXT_CONNECTION_MILLIS = 200;
+    private static final String LINKS_SELECTOR = "a[href]";
+    private static final String HREF_SELECTOR = "href";
+    private static final String IMG_TAG = "img";
+    private static final String SRC_ATTR = "src";
+
+    private static final int CONNECTION_TIMEOUT = 5000;
+    private static final int WAIT_BEFORE_NEXT_CONNECTION_MILLIS = 200;
     private static final long WAIT_IF_CONNECTION_REFUSED_MILLIS = 500;
     private static final List<PortalInfo> portalInfoList;
-    public static final String WIDTH_KEY = "width";
+    private static final String WIDTH_KEY = "width";
+    public static final String META_PROPERTY_TITLE = "meta[property=og:title]";
+    public static final String CONTENT_ATTRIBUTE = "content";
+    public static final String USER_AGENT = "Mozilla/5.0";
+    public static final String REFERER = "http://www.google.com";
 
-    private final ArticleDAO dataStore;
+    private final ArticleRepository dataStore;
     private final List<NewsArticle> recentArticles;
     private final DateProvider dateProvider;
 
@@ -45,7 +51,7 @@ public final class NewsDownloader {
     }
 
 
-    public NewsDownloader(final ArticleDAO datastore, final DateProvider dateProvider) {
+    public NewsDownloader(final ArticleRepository datastore, final DateProvider dateProvider) {
         this.dataStore = datastore;
         this.recentArticles = datastore.getRecentArticles();
         this.dateProvider = dateProvider;
@@ -103,12 +109,12 @@ public final class NewsDownloader {
                     Integer width1, width2;
                     try {
                         width1 = Integer.valueOf(o1.attr(WIDTH_KEY));
-                    }catch (final NumberFormatException exception){
+                    } catch (final NumberFormatException exception) {
                         return -1;
                     }
                     try {
                         width2 = Integer.valueOf(o2.attr(WIDTH_KEY));
-                    } catch (final NumberFormatException exception){
+                    } catch (final NumberFormatException exception) {
                         return 1;
                     }
 
@@ -153,13 +159,13 @@ public final class NewsDownloader {
         }
     }
 
-    private String getTitle(final Document artDOM) {
+    private String getTitle(final Document articleDOM) {
         String title;
-        final Elements metaOgTitle = artDOM.select("meta[property=og:title]");
+        final Elements metaOgTitle = articleDOM.select(META_PROPERTY_TITLE);
         if (metaOgTitle != null) {
-            title = metaOgTitle.attr("content");
+            title = metaOgTitle.attr(CONTENT_ATTRIBUTE);
         } else {
-            title = artDOM.title();
+            title = articleDOM.title();
         }
         return title;
         //return title.split("|")[0].trim();
@@ -175,16 +181,20 @@ public final class NewsDownloader {
         }
     }
 
-    private Connection getConnection(String url) {
-        while (url.startsWith("/")) {
-            url = url.replaceFirst("/", "");
+    private Connection getConnection(final String url) {
+        String parsedUrl = url;
+
+        while (parsedUrl.startsWith("/")) {
+            parsedUrl = parsedUrl.replaceFirst("/", "");
         }
-        if (url.startsWith("www")) {
-            url = "http://" + url;
+        if (parsedUrl.startsWith("www")) {
+            parsedUrl = "http://" + parsedUrl;
         }
-        Connection connection = Jsoup.connect(url);
-        connection = connection.userAgent("Mozilla/5.0");
-        connection = connection.referrer("http://www.google.com");
-        return connection.timeout(CONNECTION_TIMEOUT);
+
+        final Connection connection = Jsoup.connect(parsedUrl)
+                .userAgent(USER_AGENT)
+                .referrer(REFERER)
+                .timeout(CONNECTION_TIMEOUT);
+        return connection;
     }
 }

@@ -1,5 +1,6 @@
 package hr.dgecek.newsparser;
 
+import hr.dgecek.newsparser.DB.ArticleRepository;
 import hr.dgecek.newsparser.categorizer.Categorizer;
 import hr.dgecek.newsparser.entity.NewsArticle;
 import hr.dgecek.newsparser.sentimentfilter.SentimentFilter;
@@ -18,12 +19,12 @@ import static hr.dgecek.newsparser.NewsAnnotator.POSITIVE;
  */
 public final class FeaturesFormatter {
 
-    public static final String TRAIN_PATH = "/home/dgecek/projects/intellij/annotatedNews/news.train";
-    public static final String TEST_PATH = "/home/dgecek/projects/intellij/annotatedNews/news.test";
-    public static final float PERCENTAGE_FOR_TRAINING = 0.7f;
+    private static final String TRAIN_PATH = "/home/dgecek/projects/intellij/annotatedNews/news.train";
+    private static final String TEST_PATH = "/home/dgecek/projects/intellij/annotatedNews/news.test";
+    private static final float PERCENTAGE_FOR_TRAINING = 0.7f;
 
     private final List<String> legitSentiments;
-    private final ArticleDAO datastore;
+    private final ArticleRepository datastore;
     private final SCStemmer stemmer;
     private final StopWordsRemover stopWordsRemover;
     private final Categorizer categorizer;
@@ -31,7 +32,7 @@ public final class FeaturesFormatter {
     private final SentimentFilter sentimentFilter;
     private final Statistics statistics = new Statistics();
 
-    public FeaturesFormatter(final ArticleDAO datastore,
+    public FeaturesFormatter(final ArticleRepository datastore,
                              final SCStemmer stemmer,
                              final StopWordsRemover stopWordsRemover,
                              final Categorizer categorizer,

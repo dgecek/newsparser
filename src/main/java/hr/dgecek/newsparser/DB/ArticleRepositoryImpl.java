@@ -1,7 +1,6 @@
 package hr.dgecek.newsparser.DB;
 
 import com.mongodb.DuplicateKeyException;
-import hr.dgecek.newsparser.ArticleDAO;
 import hr.dgecek.newsparser.date.DateProvider;
 import hr.dgecek.newsparser.entity.NewsArticle;
 import org.mongodb.morphia.Datastore;
@@ -11,7 +10,7 @@ import java.util.List;
 /**
  * Created by dgecek on 16.11.16..
  */
-public final class ArticleDatastoreWrapper implements ArticleDAO {
+public final class ArticleRepositoryImpl implements ArticleRepository {
 
     public static final String SAVING_STRING = "saving...";
     public static final String NOT_AN_ARTICLE_STRING = "Not an article. Not saving.";
@@ -23,8 +22,8 @@ public final class ArticleDatastoreWrapper implements ArticleDAO {
     private final DataStoreStatistics statistics = new DataStoreStatistics();
     private final DateProvider dateProvider;
 
-    public ArticleDatastoreWrapper(final Datastore datastore,
-                                   final DateProvider dateProvider) {
+    public ArticleRepositoryImpl(final Datastore datastore,
+                                 final DateProvider dateProvider) {
         this.dataStore = datastore;
         this.dateProvider = dateProvider;
     }

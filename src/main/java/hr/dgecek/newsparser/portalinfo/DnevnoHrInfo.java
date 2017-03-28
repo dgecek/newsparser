@@ -7,7 +7,8 @@ import java.util.regex.Pattern;
  */
 public final class DnevnoHrInfo implements PortalInfo {
 
-    public final String URL_PATTERN = "http://www\\.dnevno\\.hr/.+/\\w+-\\w+-.+-\\d+.*";
+    private static final String PORTAL_NAME = "DNEVNO";
+    private final String URL_PATTERN = "http://www\\.dnevno\\.hr/.+/\\w+-\\w+-.+-\\d+.*";
 
     @Override
     public String getURL() {
@@ -15,7 +16,7 @@ public final class DnevnoHrInfo implements PortalInfo {
     }
 
     @Override
-    public boolean checkNewsURLRegex(String url) {
+    public boolean checkNewsURLRegex(final String url) {
         //http://www.dnevno.hr/vijesti/svijet/trumpovih-prvih-100-dana-evo-sto-kani-uciniti-974582#axzz4QSqEOd9z
         final Pattern pattern = Pattern.compile(URL_PATTERN);
         boolean b = pattern.matcher(url).matches();
@@ -43,6 +44,6 @@ public final class DnevnoHrInfo implements PortalInfo {
 
     @Override
     public String getName() {
-        return "DNEVNO";
+        return PORTAL_NAME;
     }
 }

@@ -8,15 +8,14 @@ import java.util.regex.Pattern;
  */
 public final class TportalPortalInfo implements PortalInfo {
 
-    public static final String TPORTAL = "tportal";
+    // example: http://www.tportal.hr/vijesti/hrvatska/450709/USKOK-se-zainteresirao-za-gradnju-nebodera-u-Maksimiru.html
+    //private static final String urlPattern = "\\/\\w+\\/\\d+\\/.+\\.html";
+    private static final String URL_PATTERN = ".*www\\.tportal\\.hr/.+/clanak/.+";
+    private static final String PORTAL_NAME = "tportal";
 
     public String getURL() {
         return "";
     }
-
-    // example: http://www.tportal.hr/vijesti/hrvatska/450709/USKOK-se-zainteresirao-za-gradnju-nebodera-u-Maksimiru.html
-    //private static final String urlPattern = "\\/\\w+\\/\\d+\\/.+\\.html";
-    private static final String URL_PATTERN = ".*www\\.tportal\\.hr/.+/clanak/.+";
 
     @Override
     public boolean checkNewsURLRegex(String url) {
@@ -49,7 +48,7 @@ public final class TportalPortalInfo implements PortalInfo {
 
     @Override
     public String getName() {
-        return TPORTAL;
+        return PORTAL_NAME;
     }
 
 }

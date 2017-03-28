@@ -1,4 +1,4 @@
-package hr.dgecek.newsparser;
+package hr.dgecek.newsparser.DB;
 
 import hr.dgecek.newsparser.entity.NewsArticle;
 
@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by dgecek on 20.11.16..
  */
-public interface ArticleDAO {
+public interface ArticleRepository {
 
     void addArticle(NewsArticle article);
 

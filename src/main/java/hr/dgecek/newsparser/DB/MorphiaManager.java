@@ -10,12 +10,12 @@ import org.mongodb.morphia.Morphia;
  */
 public final class MorphiaManager {
 
-    public static final String DB_NAME = "newsParser";
+    private static final String DB_NAME = "newsParser";
     private static final String PACKAGE_NAME = "hr.dgecek.newsparser.entity";
 
-    private static ArticleDatastoreWrapper datastoreInstance;
+    private static ArticleRepositoryImpl datastoreInstance;
 
-    public static ArticleDatastoreWrapper getDataStore(final DateProvider dateProvider) {
+    public static ArticleRepositoryImpl getDataStore(final DateProvider dateProvider) {
         if(datastoreInstance == null) {
             final Morphia morphia = new Morphia();
 
@@ -27,7 +27,7 @@ public final class MorphiaManager {
             final Datastore datastore = morphia.createDatastore(new MongoClient(), DB_NAME);
             datastore.ensureIndexes();
 
-            datastoreInstance = new ArticleDatastoreWrapper(datastore, dateProvider);
+            datastoreInstance = new ArticleRepositoryImpl(datastore, dateProvider);
         }
 
         return datastoreInstance;

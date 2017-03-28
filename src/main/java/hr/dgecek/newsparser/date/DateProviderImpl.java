@@ -7,6 +7,7 @@ import java.util.Date;
  * Created by dgecek on 26.03.17..
  */
 public final class DateProviderImpl implements DateProvider {
+
     @Override
     public Date getCurrentDate() {
         return new Date();

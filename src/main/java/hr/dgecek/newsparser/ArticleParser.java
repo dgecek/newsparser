@@ -7,21 +7,21 @@ import org.jsoup.Jsoup;
  */
 public final class ArticleParser {
 
-    public static String parse(String unparsedArticle) {
+    public static String parse(final String unparsedArticle) {
+        String parsedArticle = "";
 
-        unparsedArticle = unparsedArticle.replace("<br>", "").replace("<strong>", "").replace("</strong>", "").replace("<em>", "").replace("</em>", "")
+        parsedArticle = unparsedArticle.replace("<br>", "").replace("<strong>", "").replace("</strong>", "").replace("<em>", "").replace("</em>", "")
                 .replace("<section class=\"articleBody\">", "");
 
-        unparsedArticle = unparsedArticle.split("<a class=")[0];
-        unparsedArticle = unparsedArticle.split("<script>")[0];
+        parsedArticle = parsedArticle.split("<a class=")[0];
+        parsedArticle = parsedArticle.split("<script>")[0];
 
-        unparsedArticle = unparsedArticle.replace("\n", "").replace("  ", " ");
+        parsedArticle = parsedArticle.replace("\n", "").replace("  ", " ");
 
-        unparsedArticle = unparsedArticle.replaceAll("(<!-- start:article image -->)(.)*(<!-- end:article image -->)", "");
+        parsedArticle = parsedArticle.replaceAll("(<!-- start:article image -->)(.)*(<!-- end:article image -->)", "");
 
-
-        return Jsoup.parse(unparsedArticle).text();
+        //maybe this is enough?
+        return Jsoup.parse(parsedArticle).text();
 
     }
 }
-//em

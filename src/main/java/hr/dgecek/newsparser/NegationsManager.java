@@ -7,6 +7,7 @@ import java.util.List;
  * Created by dgecek on 25.12.16..
  */
 public final class NegationsManager {
+
     private final List<String> negations = new ArrayList<>();
 
     public NegationsManager() {
