@@ -195,6 +195,7 @@ public final class FeaturesFormatter {
     }
 
     private static class Statistics {
+
         private int numOfNegatives = 0;
         private int numOfPositives = 0;
         private int numOfNeutrals = 0;

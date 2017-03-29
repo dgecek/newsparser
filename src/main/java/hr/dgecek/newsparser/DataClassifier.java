@@ -10,10 +10,10 @@ import java.io.IOException;
 
 public final class DataClassifier {
 
-    public static final String PROP_FILE_PATH = "/home/dgecek/projects/intellij/annotatedNews/news.prop";
-    public static final String TRAINING_SET_PATH = "/home/dgecek/projects/intellij/annotatedNews/news.train";
-    public static final String TEST_SET_PATH = "/home/dgecek/projects/intellij/annotatedNews/news.test";
-    public static final String ENCODING = "utf-8";
+    private static final String PROP_FILE_PATH = "/home/dgecek/projects/intellij/annotatedNews/news.prop";
+    private static final String TRAINING_SET_PATH = "/home/dgecek/projects/intellij/annotatedNews/news.train";
+    private static final String TEST_SET_PATH = "/home/dgecek/projects/intellij/annotatedNews/news.test";
+    private static final String ENCODING = "utf-8";
 
     public DataClassifier(final ArticleRepository datastore) {
 
