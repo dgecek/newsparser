@@ -5,28 +5,39 @@ import org.mongodb.morphia.annotations.*;
 import org.mongodb.morphia.utils.IndexDirection;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by dgecek on 27.10.16..
  */
 
 @Entity("newsarticles")
-public class NewsArticle {
+public final class NewsArticle {
 
     @Id
     private ObjectId id;
 
-    private String title;
-    private String body;
-
     @Indexed(value = IndexDirection.ASC, name = "url_unique", unique = true, dropDups = true)
     private String url;     //another id
+
+    private String title;
+    private String body;
     private String category;
     private String portal;
     private String sentiment;
     private String predictedSentiment;
     private Date date;
     private String urlToImage;
+    private HashMap<String, Double> termsTfIdfs = new HashMap<>();
+
+    public HashMap<String, Double> getTermsTfIdfs() {
+        return termsTfIdfs;
+    }
+
+    public void putTermTfIdf(final String term, final Double tfIdf) {
+        this.termsTfIdfs.put(term, tfIdf);
+    }
 
     public String getUrlToImage() {
         return urlToImage;
@@ -82,6 +93,10 @@ public class NewsArticle {
 
     public void setBody(String body) {
         this.body = body;
+    }
+
+    public String getTitleAndText(){
+        return getTitle() + " " + getBody();
     }
 
     public String getUrl() {

@@ -4,6 +4,7 @@ import com.mongodb.DuplicateKeyException;
 import hr.dgecek.newsparser.date.DateProvider;
 import hr.dgecek.newsparser.entity.NewsArticle;
 import org.mongodb.morphia.Datastore;
+import org.mongodb.morphia.query.Criteria;
 
 import java.util.List;
 

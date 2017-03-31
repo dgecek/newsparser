@@ -34,10 +34,14 @@ public final class Main {
         final SentimentFilter sentimentFilter = new SentimentFilterImpl(stemmer);
         final FeaturesFormatter featuresFormatter = new FeaturesFormatter(datastore, stemmer, stopWordsRemover, categorizer, negationsManager, sentimentFilter);
         final DataClassifier dataClassifier = new DataClassifier(datastore);
+        final NewsGrouper newsGrouper = new NewsGrouper();
+
 
         downloader.downloadNews();
         //annotator.startUserAnnotation();
         featuresFormatter.saveTrainingAndTestSetsToFile();
         dataClassifier.classify();
+
+        newsGrouper.start();
     }
 }

@@ -2,6 +2,7 @@ package hr.dgecek.newsparser;
 
 import hr.dgecek.newsparser.DB.ArticleRepository;
 import hr.dgecek.newsparser.categorizer.Categorizer;
+import hr.dgecek.newsparser.categorizer.CategorizerImpl;
 import hr.dgecek.newsparser.entity.NewsArticle;
 
 import java.io.BufferedReader;
@@ -51,7 +52,7 @@ public final class NewsAnnotator {
         System.out.println();
         System.out.println(ANNOTATION_STARTED_STRING);
         for (final NewsArticle article : articles) {
-            if (!article.hasSentiment() && ("vijesti".equals(categorizer.getCategory(article.getCategory())))) {
+            if (!article.hasSentiment() && (CategorizerImpl.NEWS_CATEGORY.equals(categorizer.getCategory(article.getCategory())))) {
                 System.out.println(article.toString());
                 System.out.println(PLEASE_CHOOSE_STRING);
 

@@ -1,16 +1,19 @@
 package hr.dgecek.newsparser;
 
-import edu.stanford.nlp.classify.Classifier;
-import edu.stanford.nlp.classify.ColumnDataClassifier;
+import edu.stanford.nlp.classify.*;
 import edu.stanford.nlp.ling.Datum;
 import edu.stanford.nlp.objectbank.ObjectBank;
+import edu.stanford.nlp.util.Pair;
 import hr.dgecek.newsparser.DB.ArticleRepository;
 
 import java.io.IOException;
+import java.util.List;
 
 public final class DataClassifier {
 
     private static final String PROP_FILE_PATH = "/home/dgecek/projects/intellij/annotatedNews/news.prop";
+    private static final String CROSS_VALIDATION_PROP = "/home/dgecek/projects/intellij/annotatedNews/cross_validation.prop";
+
     private static final String TRAINING_SET_PATH = "/home/dgecek/projects/intellij/annotatedNews/news.train";
     private static final String TEST_SET_PATH = "/home/dgecek/projects/intellij/annotatedNews/news.test";
     private static final String ENCODING = "utf-8";
@@ -29,6 +32,20 @@ public final class DataClassifier {
             System.out.println(line + "  ==>  " + classifier.classOf(datum));
             System.out.println(classifier.scoresOf(datum));
         }
+    }
+
+    //you should add crossValidationFolds=10, printCrossValidationDecisions=true and shuffleTrainingData=true in your prop file for your features.
+    public void crossValidate(){
+        final ColumnDataClassifier columnDataClassifier = new ColumnDataClassifier(CROSS_VALIDATION_PROP);
+        final Pair<GeneralDataset<String, String>, List<String[]>> crossValidationExamples = columnDataClassifier.readTestExamples(TRAINING_SET_PATH);
+        columnDataClassifier.crossValidate(crossValidationExamples.first(), crossValidationExamples.second());
+
+
+        final LinearClassifierFactory<String, String> linearClassifierFactory = new LinearClassifierFactory<>();
+        linearClassifierFactory.crossValidateSetSigma(crossValidationExamples.first(),10);
+
+        //final CrossValidator<String, String> crossValidator = new CrossValidator<>(crossValidationExamples.first());
+
     }
 
     public void trainAndTest() {

@@ -4,6 +4,7 @@ import hr.dgecek.newsparser.DB.ArticleRepository;
 import hr.dgecek.newsparser.date.DateProvider;
 import hr.dgecek.newsparser.entity.NewsArticle;
 import hr.dgecek.newsparser.portalinfo.*;
+import hr.dgecek.newsparser.utils.TextUtils;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -89,7 +90,7 @@ public final class NewsDownloader {
                 article.setTitle(title);
 
                 final String unparsedArticle = articleDOM.select(portal.getArticleSelector()).toString();
-                final String parsedArticle = ArticleParser.parse(unparsedArticle);
+                final String parsedArticle = TextUtils.removeHTMLAndJS(unparsedArticle);
 
                 article.setBody(parsedArticle);
                 article.setCategory(portal.getCategoryFromUrl(article.getUrl()));

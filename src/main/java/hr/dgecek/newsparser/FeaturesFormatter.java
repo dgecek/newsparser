@@ -6,6 +6,7 @@ import hr.dgecek.newsparser.entity.NewsArticle;
 import hr.dgecek.newsparser.sentimentfilter.SentimentFilter;
 import hr.dgecek.newsparser.stemmer.SCStemmer;
 import hr.dgecek.newsparser.stopwordremover.StopWordsRemover;
+import hr.dgecek.newsparser.utils.TextUtils;
 
 import java.io.*;
 import java.util.*;
@@ -150,7 +151,7 @@ public final class FeaturesFormatter {
     private String format(final String string) {
         String newString = stopWordsRemover.removeStopWords(string);
         newString = stemmer.stemLine(newString);
-        newString = formatInterpunction(newString);
+        newString = TextUtils.formatInterpunction(newString);
         //newString = removeInterpunction(newString);
 
 
@@ -158,38 +159,6 @@ public final class FeaturesFormatter {
         //remove all names?
         //remove every sentence that has " or rekl, kaž,... dvotocka
         //what about words that start with pre, razdvoji?
-
-        return newString;
-    }
-
-    private String removeInterpunction(final String string) {
-        final String newString = string.replace("\t", "")
-                .replace("\n", "")
-                .replace(".", "")
-                .replace("?", "")
-                .replace("!", "")
-                .replace(",", "")
-                .replace(":", "")
-                .replace(";", "")
-                .replace("'", "")
-                .replace("\"", "")
-                .replace("  ", "");
-
-        return newString;
-    }
-
-    private String formatInterpunction(final String string) {
-        String newString = string.replace("\t", " ")
-                .replace("\n", " ")
-                .replace(".", " .")
-                .replace("?", " ?")
-                .replace("!", " !")
-                .replace(",", " ,")
-                .replace(":", " :")
-                .replace(";", " ;")
-                .replace("'", " ' ")
-                .replace("\"", " \" ")
-                .replace("  ", " ");
 
         return newString;
     }

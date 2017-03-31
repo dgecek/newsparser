@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class CategorizerImpl implements Categorizer {
+
+    public static final String NEWS_CATEGORY = "vijesti";
+
     final private Map<String, String> categories = new HashMap<>();
 
    /* vijesti:vijesti:politika-kriminal:globus:biznis:kolumnisti
@@ -22,10 +25,10 @@ public final class CategorizerImpl implements Categorizer {
     internet:viral:video:magazin
 */
     public CategorizerImpl() {
-        categories.put("politika-kriminal", "vijesti");
-        categories.put("globus", "vijesti");
-        categories.put("biznis", "vijesti");
-        categories.put("kolumnisti", "vijesti");
+        categories.put("politika-kriminal", NEWS_CATEGORY);
+        categories.put("globus", NEWS_CATEGORY);
+        categories.put("biznis", NEWS_CATEGORY);
+        categories.put("kolumnisti", NEWS_CATEGORY);
 
         categories.put("spektakli", "reality");
         categories.put("rouge", "reality");
