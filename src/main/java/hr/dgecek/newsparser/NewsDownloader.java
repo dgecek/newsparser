@@ -31,14 +31,15 @@ public final class NewsDownloader {
     private static final long WAIT_IF_CONNECTION_REFUSED_MILLIS = 500;
     private static final List<PortalInfo> portalInfoList;
     private static final String WIDTH_KEY = "width";
-    public static final String META_PROPERTY_TITLE = "meta[property=og:title]";
-    public static final String CONTENT_ATTRIBUTE = "content";
-    public static final String USER_AGENT = "Mozilla/5.0";
-    public static final String REFERER = "http://www.google.com";
+    private static final String META_PROPERTY_TITLE = "meta[property=og:title]";
+    private static final String CONTENT_ATTRIBUTE = "content";
+    private static final String USER_AGENT = "Mozilla/5.0";
+    private static final String REFERRER = "http://www.google.com";
 
     private final ArticleRepository dataStore;
     private final List<NewsArticle> recentArticles;
     private final DateProvider dateProvider;
+    private final List<String> triedUrls = new ArrayList<>();
 
     static {
         portalInfoList = new ArrayList<>();
@@ -76,6 +77,12 @@ public final class NewsDownloader {
             final String articleUrl = link.attr(HREF_SELECTOR);
             if (portal.checkNewsURLRegex(articleUrl) && !isArticleAlreadySaved(articleUrl)) {
                 final NewsArticle article = new NewsArticle();
+
+                if (triedUrls.contains(articleUrl)) {
+                    continue;
+                } else {
+                    triedUrls.add(articleUrl);
+                }
                 article.setUrl(articleUrl);
 
                 waitBeforeNextRequest();
@@ -194,7 +201,7 @@ public final class NewsDownloader {
 
         final Connection connection = Jsoup.connect(parsedUrl)
                 .userAgent(USER_AGENT)
-                .referrer(REFERER)
+                .referrer(REFERRER)
                 .timeout(CONNECTION_TIMEOUT);
         return connection;
     }

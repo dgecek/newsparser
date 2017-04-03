@@ -13,6 +13,8 @@ public interface ArticleRepository {
 
     List<NewsArticle> getAll();
 
+    List<NewsArticle> getNonPredictedArticles();
+
     String getStatistics();
 
     void update(NewsArticle article);

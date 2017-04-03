@@ -103,9 +103,17 @@ public final class FeaturesFormatter {
         System.out.println(statistics.toString());
     }
 
-    public Map<NewsArticle, String> getFeaturesLinesForNonAnottatedArticles(){
-        //TODO
-        return null;
+    public Map<NewsArticle, String> getFeaturesLinesForNonAnottatedArticles() {
+        final List<NewsArticle> articles = datastore.getNonPredictedArticles();
+        final Map<NewsArticle, String> articleLines = new HashMap<>();
+
+        for (final NewsArticle article : articles) {
+            if (!article.hasSentiment() && "vijesti".equals(categorizer.getCategory(article.getCategory()))) {
+                articleLines.put(article, getStringToWrite(article));
+            }
+        }
+
+        return articleLines;
     }
 
     private String getStringToWrite(final NewsArticle newsArticle) {
@@ -170,18 +178,22 @@ public final class FeaturesFormatter {
         private int numOfNeutrals = 0;
 
         void increaseCounter(final String sentiment) {
-            switch (sentiment) {
-                case NewsAnnotator.NEGATIVE:
-                    numOfNegatives++;
-                    break;
-                case NewsAnnotator.POSITIVE:
-                    numOfPositives++;
-                    break;
-                case NewsAnnotator.NEUTRAL:
-                    numOfNeutrals++;
-                    break;
-                default:
-                    throw new IllegalArgumentException();
+            if (sentiment != null) {
+                switch (sentiment) {
+                    case NewsAnnotator.NEGATIVE:
+                        numOfNegatives++;
+                        break;
+                    case NewsAnnotator.POSITIVE:
+                        numOfPositives++;
+                        break;
+                    case NewsAnnotator.NEUTRAL:
+                        numOfNeutrals++;
+                        break;
+                    case "":
+                        break;
+                    default:
+                        throw new IllegalArgumentException();
+                }
             }
         }
 

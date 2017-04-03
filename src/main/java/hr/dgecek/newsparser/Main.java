@@ -6,6 +6,7 @@ import hr.dgecek.newsparser.categorizer.Categorizer;
 import hr.dgecek.newsparser.categorizer.CategorizerImpl;
 import hr.dgecek.newsparser.date.DateProvider;
 import hr.dgecek.newsparser.date.DateProviderImpl;
+import hr.dgecek.newsparser.entity.NewsArticle;
 import hr.dgecek.newsparser.sentimentfilter.SentimentFilter;
 import hr.dgecek.newsparser.sentimentfilter.SentimentFilterImpl;
 import hr.dgecek.newsparser.stemmer.LjubesicPandzicStemmer;
@@ -14,6 +15,7 @@ import hr.dgecek.newsparser.stopwordremover.StopWordsRemover;
 import hr.dgecek.newsparser.stopwordremover.StopWordsRemoverImpl;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * Created by dgecek on 27.10.16..
@@ -39,9 +41,16 @@ public final class Main {
 
         downloader.downloadNews();
         //annotator.startUserAnnotation();
+<<<<<<< Updated upstream
         featuresFormatter.saveTrainingAndTestSetsToFile();
         dataClassifier.classify();
 
         newsGrouper.start();
+=======
+
+        //featuresFormatter.saveTrainingAndTestSetsToFile();
+        final Map<NewsArticle, String> articleLines = featuresFormatter.getFeaturesLinesForNonAnottatedArticles();
+        dataClassifier.classify(articleLines);
+>>>>>>> Stashed changes
     }
 }
