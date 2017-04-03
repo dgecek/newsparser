@@ -36,21 +36,20 @@ public final class Main {
         final SentimentFilter sentimentFilter = new SentimentFilterImpl(stemmer);
         final FeaturesFormatter featuresFormatter = new FeaturesFormatter(datastore, stemmer, stopWordsRemover, categorizer, negationsManager, sentimentFilter);
         final DataClassifier dataClassifier = new DataClassifier(datastore);
-        final NewsGrouper newsGrouper = new NewsGrouper();
+        final NewsGrouper newsGrouper = new NewsGrouper(datastore);
 
 
-        downloader.downloadNews();
+        //downloader.downloadNews();
         //annotator.startUserAnnotation();
-<<<<<<< Updated upstream
+
         featuresFormatter.saveTrainingAndTestSetsToFile();
-        dataClassifier.classify();
 
-        newsGrouper.start();
-=======
+        dataClassifier.trainAndTest();
+        //dataClassifier.crossValidateSigma();
 
-        //featuresFormatter.saveTrainingAndTestSetsToFile();
         final Map<NewsArticle, String> articleLines = featuresFormatter.getFeaturesLinesForNonAnottatedArticles();
         dataClassifier.classify(articleLines);
->>>>>>> Stashed changes
+
+        //newsGrouper.start();
     }
 }

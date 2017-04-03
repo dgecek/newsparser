@@ -22,7 +22,7 @@ public final class FeaturesFormatter {
 
     private static final String TRAIN_PATH = "/home/dgecek/projects/intellij/annotatedNews/news.train";
     private static final String TEST_PATH = "/home/dgecek/projects/intellij/annotatedNews/news.test";
-    private static final float PERCENTAGE_FOR_TRAINING = 0.7f;
+    private static final float PERCENTAGE_FOR_TRAINING = 1.0f;
 
     private final List<String> legitSentiments;
     private final ArticleRepository datastore;

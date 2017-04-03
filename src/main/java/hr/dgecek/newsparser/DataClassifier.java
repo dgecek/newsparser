@@ -50,7 +50,7 @@ public final class DataClassifier {
     }
 
     //you should add crossValidationFolds=10, printCrossValidationDecisions=true and shuffleTrainingData=true in your prop file for your features.
-    public void crossValidate() {
+    public void crossValidateSigma() {
         final ColumnDataClassifier columnDataClassifier = new ColumnDataClassifier(CROSS_VALIDATION_PROP);
         final Pair<GeneralDataset<String, String>, List<String[]>> crossValidationExamples = columnDataClassifier.readTestExamples(TRAINING_SET_PATH);
 
