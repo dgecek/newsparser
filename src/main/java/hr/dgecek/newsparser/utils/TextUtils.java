@@ -10,7 +10,9 @@ public final class TextUtils {
     public static String removeHTMLAndJS(final String unparsedArticle) {
         String parsedArticle = "";
 
-        parsedArticle = unparsedArticle.replace("<br>", "").replace("<strong>", "").replace("</strong>", "").replace("<em>", "").replace("</em>", "")
+        parsedArticle = Jsoup.parse(unparsedArticle).text();
+
+        parsedArticle = parsedArticle.replace("<br>", "").replace("<strong>", "").replace("</strong>", "").replace("<em>", "").replace("</em>", "")
                 .replace("<section class=\"articleBody\">", "");
 
         parsedArticle = parsedArticle.split("<a class=")[0];
@@ -20,8 +22,7 @@ public final class TextUtils {
 
         parsedArticle = parsedArticle.replaceAll("(<!-- start:article image -->)(.)*(<!-- end:article image -->)", "");
 
-        //TODO maybe this is enough?
-        return Jsoup.parse(parsedArticle).text();
+        return parsedArticle;
     }
 
     public static String removeInterpunction(final String string) {

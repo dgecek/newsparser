@@ -58,6 +58,13 @@ public final class ArticleRepositoryImpl implements ArticleRepository {
     }
 
     @Override
+    public List<NewsArticle> getNonPredictedArticles() {
+        return dataStore.find(NewsArticle.class)
+                .field("predictedSentiment").doesNotExist()
+                .asList();
+    }
+
+    @Override
     public void update(final NewsArticle article) {
         dataStore.save(article);
     }
