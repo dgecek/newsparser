@@ -24,24 +24,26 @@ public final class Main {
 
     public static void main(final String[] args) throws IOException, InterruptedException {
         final DateProvider dateProvider = new DateProviderImpl();
-        final ArticleRepository datastore = MorphiaManager.getDataStore(dateProvider);
+        final ArticleRepository articleRepository = MorphiaManager.getDataStore(dateProvider);
         final SCStemmer stemmer = new LjubesicPandzicStemmer();
         final StopWordsRemover stopWordsRemover = new StopWordsRemoverImpl();
         final Categorizer categorizer = new CategorizerImpl();
-        final NewsDownloader downloader = new NewsDownloader(datastore, dateProvider);
-        final NewsAnnotator annotator = new NewsAnnotator(datastore, categorizer);
+        final NewsDownloader downloader = new NewsDownloader(articleRepository, dateProvider);
+        final NewsAnnotator annotator = new NewsAnnotator(articleRepository, categorizer);
         final NegationsManager negationsManager = new NegationsManager();
         final SentimentFilter sentimentFilter = new SentimentFilterImpl(stemmer);
-        final FeaturesFormatter featuresFormatter = new FeaturesFormatter(datastore, stemmer, stopWordsRemover, categorizer, negationsManager, sentimentFilter);
-        final DataClassifier dataClassifier = new DataClassifier(datastore);
-        final NewsGrouper newsGrouper = new NewsGrouper();
+        final FeaturesFormatter featuresFormatter = new FeaturesFormatter(articleRepository, stemmer, stopWordsRemover, categorizer, negationsManager, sentimentFilter);
+        final DataClassifier dataClassifier = new DataClassifier(articleRepository);
+        final NewsGrouper newsGrouper = new NewsGrouper(articleRepository);
 
 
         downloader.downloadNews();
         //annotator.startUserAnnotation();
         featuresFormatter.saveTrainingAndTestSetsToFile();
-        dataClassifier.classify();
+        dataClassifier.crossValidateSigma();
+        dataClassifier.trainAndTest();
 
-        newsGrouper.start();
+        //dataClassifier.classify();
+        //newsGrouper.start();
     }
 }

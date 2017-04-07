@@ -20,7 +20,7 @@ public final class TextUtils {
 
         parsedArticle = parsedArticle.replaceAll("(<!-- start:article image -->)(.)*(<!-- end:article image -->)", "");
 
-        //maybe this is enough?
+        //TODO maybe this is enough?
         return Jsoup.parse(parsedArticle).text();
     }
 
