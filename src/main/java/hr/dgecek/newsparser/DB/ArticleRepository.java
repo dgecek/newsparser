@@ -20,4 +20,6 @@ public interface ArticleRepository {
     void update(NewsArticle article);
 
     List<NewsArticle> getRecentArticles();
+
+    void clearStatistics();
 }

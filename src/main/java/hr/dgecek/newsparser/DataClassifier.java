@@ -23,15 +23,17 @@ public final class DataClassifier {
     private static final String ENCODING = "utf-8";
 
     private final ArticleRepository datastore;
+    private final ColumnDataClassifier columnDataClassifier;
+    private final Classifier<String, String> classifier;
 
     public DataClassifier(final ArticleRepository datastore) {
         this.datastore = datastore;
+
+        columnDataClassifier = new ColumnDataClassifier(PROP_FILE_PATH);
+        classifier = columnDataClassifier.makeClassifier(columnDataClassifier.readTrainingExamples(TRAINING_SET_PATH));
     }
 
     public void classify(final Map<NewsArticle, String> articleLines) {
-        final ColumnDataClassifier columnDataClassifier = new ColumnDataClassifier(PROP_FILE_PATH);
-        final Classifier<String, String> classifier = columnDataClassifier.makeClassifier(columnDataClassifier.readTrainingExamples(TRAINING_SET_PATH));
-
         final Integer[] classifiedNews = {0};
 
         articleLines.forEach((article, line) -> {

@@ -77,6 +77,11 @@ public final class ArticleRepositoryImpl implements ArticleRepository {
     }
 
     @Override
+    public void clearStatistics() {
+        statistics.clear();
+    }
+
+    @Override
     public String getStatistics() {
         return statistics.toString();
     }
@@ -93,6 +98,12 @@ public final class ArticleRepositoryImpl implements ArticleRepository {
                     ", duplicates=" + duplicates +
                     ", notAnArticles=" + notAnArticles +
                     '}';
+        }
+
+        public void clear() {
+            saved = 0;
+            duplicates = 0;
+            notAnArticles = 0;
         }
     }
 }

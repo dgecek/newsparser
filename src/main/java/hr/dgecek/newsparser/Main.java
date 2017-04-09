@@ -7,6 +7,8 @@ import hr.dgecek.newsparser.categorizer.CategorizerImpl;
 import hr.dgecek.newsparser.date.DateProvider;
 import hr.dgecek.newsparser.date.DateProviderImpl;
 import hr.dgecek.newsparser.entity.NewsArticle;
+import hr.dgecek.newsparser.idf.IdfComputer;
+import hr.dgecek.newsparser.idf.IdfComputerImpl;
 import hr.dgecek.newsparser.sentimentfilter.SentimentFilter;
 import hr.dgecek.newsparser.sentimentfilter.SentimentFilterImpl;
 import hr.dgecek.newsparser.stemmer.LjubesicPandzicStemmer;
@@ -22,7 +24,7 @@ import java.util.Map;
  */
 public final class Main {
 
-    private static final long TIME_BETWEEN_DOWNLOADING = 10 * 60 * 1000;
+    private static final long TIME_BETWEEN_DOWNLOADING = 20 * 60 * 1000;
 
     public static void main(final String[] args) throws IOException, InterruptedException {
         final DateProvider dateProvider = new DateProviderImpl();
@@ -36,20 +38,26 @@ public final class Main {
         final SentimentFilter sentimentFilter = new SentimentFilterImpl(stemmer);
         final FeaturesFormatter featuresFormatter = new FeaturesFormatter(datastore, stemmer, stopWordsRemover, categorizer, negationsManager, sentimentFilter);
         final DataClassifier dataClassifier = new DataClassifier(datastore);
-        final NewsGrouper newsGrouper = new NewsGrouper(datastore);
+        final IdfComputer idfComputer = new IdfComputerImpl(datastore, stopWordsRemover, stemmer);
+        final NewsGrouper newsGrouper = new NewsGrouper(datastore, stopWordsRemover, idfComputer, stemmer);
 
-
-        //downloader.downloadNews();
+        //featuresFormatter.saveTrainingAndTestSetsToFile();
         //annotator.startUserAnnotation();
-
-        featuresFormatter.saveTrainingAndTestSetsToFile();
-
-        dataClassifier.trainAndTest();
         //dataClassifier.crossValidateSigma();
+        //dataClassifier.trainAndTest();
 
-        final Map<NewsArticle, String> articleLines = featuresFormatter.getFeaturesLinesForNonAnottatedArticles();
-        dataClassifier.classify(articleLines);
+        newsGrouper.start();
 
-        //newsGrouper.start();
+
+       /* while (true) {
+            downloader.downloadNews();
+
+            final Map<NewsArticle, String> articleLines = featuresFormatter.getFeaturesLinesForNonAnottatedArticles();
+            dataClassifier.classify(articleLines);
+
+            newsGrouper.start();
+
+            Thread.sleep(TIME_BETWEEN_DOWNLOADING);
+        }*/
     }
 }

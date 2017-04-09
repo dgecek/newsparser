@@ -36,7 +36,10 @@ public final class TextUtils {
                 .replace(";", "")
                 .replace("'", "")
                 .replace("\"", "")
-                .replace("  ", "");
+                .replace("  ", "")
+                .replace(")", "")
+                .replace("(", "")
+                .replace("|", "");
 
         return newString;
     }

@@ -6,7 +6,6 @@ import org.mongodb.morphia.utils.IndexDirection;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * Created by dgecek on 27.10.16..
@@ -29,14 +28,18 @@ public final class NewsArticle {
     private String predictedSentiment;
     private Date date;
     private String urlToImage;
-    private HashMap<String, Double> termsTfIdfs = new HashMap<>();
+    private HashMap<String, Double> tfIdfs;
 
-    public HashMap<String, Double> getTermsTfIdfs() {
-        return termsTfIdfs;
+    public HashMap<String, Double> getTfIdfs() {
+        return tfIdfs;
+    }
+
+    public void setTfIdfs(HashMap<String, Double> tfIdfs) {
+        this.tfIdfs = tfIdfs;
     }
 
     public void putTermTfIdf(final String term, final Double tfIdf) {
-        this.termsTfIdfs.put(term, tfIdf);
+        this.tfIdfs.put(term, tfIdf);
     }
 
     public String getUrlToImage() {

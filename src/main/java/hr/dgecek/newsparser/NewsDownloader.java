@@ -70,6 +70,7 @@ public final class NewsDownloader {
         }
 
         System.out.println(dataStore.getStatistics());
+        dataStore.clearStatistics();
     }
 
     private void saveAllArticlesFromLinks(final Elements links, final PortalInfo portal) throws InterruptedException {
