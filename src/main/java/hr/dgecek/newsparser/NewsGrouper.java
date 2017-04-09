@@ -43,7 +43,7 @@ public final class NewsGrouper {
     }
 
     private void writeSimilarities(final List<NewsArticle> recentArticles) {
-        
+
     }
 
     private void writeTfIdfs(final List<NewsArticle> recentArticles) {
