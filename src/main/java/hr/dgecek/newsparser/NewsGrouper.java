@@ -43,6 +43,11 @@ public final class NewsGrouper {
     }
 
     private void writeSimilarities(final List<NewsArticle> recentArticles) {
+        for(final NewsArticle firstNewsArticle : recentArticles){
+            for(final NewsArticle secondNewsArticle : recentArticles){
+
+            }
+        }
 
     }
 
@@ -66,7 +71,7 @@ public final class NewsGrouper {
                 int finalMaximumFrequency = maximumFrequency;
                 termNumber.forEach(
                         (term, number) -> {
-                            final double tf = K + (K * (termNumber.getOrDefault(term, 0) / finalMaximumFrequency));
+                            final double tf = K + ((1 - K) * (termNumber.getOrDefault(term, 0) / finalMaximumFrequency));
                             final double idf = idfComputer.getIdfFor(term);
                             tfidfs.put(term, tf * idf);
                         }
@@ -75,10 +80,12 @@ public final class NewsGrouper {
                 articleRepository.update(newsArticle);
             }
         }
+
+        System.out.println("Wrote TF-IDF metrics");
     }
 
     private boolean isAlphaNumeric(final String term) {
-        boolean hasNonAlpha = term.matches("^.*[^a-zA-Z0-9 ].*$");
+        boolean hasNonAlpha = term.matches("^.*[^a-zA-Z].*$");
         return !hasNonAlpha;
     }
 }

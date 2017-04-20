@@ -13,10 +13,10 @@ public final class MorphiaManager {
     private static final String DB_NAME = "newsParser";
     private static final String PACKAGE_NAME = "hr.dgecek.newsparser.entity";
 
-    private static ArticleRepositoryImpl datastoreInstance;
+    private static Datastore datastoreInstance;
 
-    public static ArticleRepositoryImpl getDataStore(final DateProvider dateProvider) {
-        if(datastoreInstance == null) {
+    public static Datastore getDataStore() {
+        if (datastoreInstance == null) {
             final Morphia morphia = new Morphia();
 
             // tell Morphia where to find your classes
@@ -27,13 +27,13 @@ public final class MorphiaManager {
             final Datastore datastore = morphia.createDatastore(new MongoClient(), DB_NAME);
             datastore.ensureIndexes();
 
-            datastoreInstance = new ArticleRepositoryImpl(datastore, dateProvider);
+            datastoreInstance = datastore;
         }
 
         return datastoreInstance;
     }
 
-    private MorphiaManager(){
+    private MorphiaManager() {
 
     }
 }

@@ -1,7 +1,6 @@
 package hr.dgecek.newsparser;
 
-import hr.dgecek.newsparser.DB.ArticleRepository;
-import hr.dgecek.newsparser.DB.MorphiaManager;
+import hr.dgecek.newsparser.DB.*;
 import hr.dgecek.newsparser.categorizer.Categorizer;
 import hr.dgecek.newsparser.categorizer.CategorizerImpl;
 import hr.dgecek.newsparser.date.DateProvider;
@@ -15,6 +14,7 @@ import hr.dgecek.newsparser.stemmer.LjubesicPandzicStemmer;
 import hr.dgecek.newsparser.stemmer.SCStemmer;
 import hr.dgecek.newsparser.stopwordremover.StopWordsRemover;
 import hr.dgecek.newsparser.stopwordremover.StopWordsRemoverImpl;
+import org.mongodb.morphia.Datastore;
 
 import java.io.IOException;
 import java.util.Map;
@@ -28,7 +28,10 @@ public final class Main {
 
     public static void main(final String[] args) throws IOException, InterruptedException {
         final DateProvider dateProvider = new DateProviderImpl();
-        final ArticleRepository articleRepository = MorphiaManager.getDataStore(dateProvider);
+        final Datastore datastore = MorphiaManager.getDataStore();
+        final ArticleRepository articleRepository = new ArticleRepositoryImpl(datastore, dateProvider);
+        final SimilarityRepository similarityRepository = new SimilarityRepositoryImpl(datastore);
+
         final SCStemmer stemmer = new LjubesicPandzicStemmer();
         final StopWordsRemover stopWordsRemover = new StopWordsRemoverImpl();
         final Categorizer categorizer = new CategorizerImpl();
@@ -48,9 +51,9 @@ public final class Main {
         //dataClassifier.crossValidateSigma();
         //dataClassifier.trainAndTest();
 
-        newsGrouper.start();
-        
-        /*while (true) {
+        //newsGrouper.start();
+
+        while (true) {
             downloader.downloadNews();
 
             final Map<NewsArticle, String> articleLines = featuresFormatter.getFeaturesLinesForNonAnottatedArticles();
@@ -59,6 +62,6 @@ public final class Main {
             newsGrouper.start();
 
             Thread.sleep(TIME_BETWEEN_DOWNLOADING);
-        }*/
+        }
     }
 }
