@@ -29,8 +29,8 @@ public final class IdfComputerImpl implements IdfComputer {
                 numberOfDocuments++;
                 final Set<String> termsInArticle = new HashSet<>();
                 for (final String term : stopWordsRemover.removeStopWords(TextUtils.removeInterpunction(article.getTitleAndText())).split(" ")){
-                    if(term.trim().length() > 0) {
-                        termsInArticle.add(stemmer.stem(term).trim());
+                    if(term.trim().length() > 0 && TextUtils.isTermAlphaWord(term)) {
+                        termsInArticle.add(stemmer.stem(term).trim().toLowerCase());
                     }
                 }
 

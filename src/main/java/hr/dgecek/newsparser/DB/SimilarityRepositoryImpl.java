@@ -4,6 +4,8 @@ import hr.dgecek.newsparser.entity.Similarity;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
 
+import java.util.List;
+
 /**
  * Created by dgecek on 20.04.17..
  */
@@ -21,7 +23,14 @@ public class SimilarityRepositoryImpl implements SimilarityRepository {
     }
 
     @Override
-    public void get(final ObjectId firstArticleId) {
-        //TODO
+    public List<Similarity> get(final ObjectId firstArticleId) {
+        return datastore.find(Similarity.class)
+                .field("firstArticleId").equal(firstArticleId)
+                .asList();
+    }
+
+    @Override
+    public boolean similarityExistsForArticleId(final ObjectId firstArticleId) {
+        return !get(firstArticleId).isEmpty();
     }
 }

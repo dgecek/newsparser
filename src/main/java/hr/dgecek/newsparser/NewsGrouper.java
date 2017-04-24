@@ -1,8 +1,10 @@
 package hr.dgecek.newsparser;
 
 import hr.dgecek.newsparser.DB.ArticleRepository;
+import hr.dgecek.newsparser.DB.SimilarityRepository;
 import hr.dgecek.newsparser.categorizer.CategorizerImpl;
 import hr.dgecek.newsparser.entity.NewsArticle;
+import hr.dgecek.newsparser.entity.Similarity;
 import hr.dgecek.newsparser.idf.IdfComputer;
 import hr.dgecek.newsparser.stemmer.SCStemmer;
 import hr.dgecek.newsparser.stopwordremover.StopWordsRemover;
@@ -11,6 +13,7 @@ import hr.dgecek.newsparser.utils.TextUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 
 /**
@@ -21,34 +24,78 @@ public final class NewsGrouper {
     private static final double K = 0.5;
 
     private final ArticleRepository articleRepository;
+    private final SimilarityRepository similarityRepository;
     private final StopWordsRemover stopWordsRemover;
     private final IdfComputer idfComputer;
     private final SCStemmer stemmer;
 
     public NewsGrouper(final ArticleRepository articleRepository,
+                       final SimilarityRepository similarityRepository,
                        final StopWordsRemover stopWordsRemover,
                        final IdfComputer idfComputer,
                        final SCStemmer stemmer) {
         this.articleRepository = articleRepository;
+        this.similarityRepository = similarityRepository;
         this.stopWordsRemover = stopWordsRemover;
         this.idfComputer = idfComputer;
         this.stemmer = stemmer;
     }
 
     public void start() {
-        final List<NewsArticle> recentArticles = articleRepository.getRecentArticles();
-
-        writeTfIdfs(recentArticles);
-        writeSimilarities(recentArticles);
+        writeTfIdfs(articleRepository.getRecentArticles());
+        writeSimilarities(articleRepository.getRecentArticles());
     }
 
     private void writeSimilarities(final List<NewsArticle> recentArticles) {
-        for(final NewsArticle firstNewsArticle : recentArticles){
-            for(final NewsArticle secondNewsArticle : recentArticles){
+        int numberOfSimilarities = 0;
+        for (final NewsArticle firstNewsArticle : recentArticles) {
+            for (final NewsArticle secondNewsArticle : recentArticles) {
+                if (firstNewsArticle != null && secondNewsArticle != null &&
+                        !firstNewsArticle.equals(secondNewsArticle) &&
+                        !similarityRepository.similarityExistsForArticleId(firstNewsArticle.getId()) &&
+                        CategorizerImpl.NEWS_CATEGORY.equals(firstNewsArticle.getCategory()) &&
+                        CategorizerImpl.NEWS_CATEGORY.equals(secondNewsArticle.getCategory())) {
+                    final Similarity similarity = new Similarity();
+                    similarity.setFirstArticleId(firstNewsArticle.getId());
+                    similarity.setSecondArticleId(secondNewsArticle.getId());
 
+                    final double cosineSimilarity = computeCosineSimilarity(firstNewsArticle, secondNewsArticle);
+                    similarity.setSimilarity(cosineSimilarity);
+                    similarityRepository.addSimilarity(similarity);
+                    numberOfSimilarities++;
+                }
             }
         }
 
+        System.out.println("Wrote " + numberOfSimilarities + "similarities");
+
+    }
+
+    private double computeCosineSimilarity(final NewsArticle firstArticle, final NewsArticle secondArticle) {
+        double fractionNumerator = 0;
+        double firstArticleNormalizer = 0;
+        double secondArticleNormalizer = 0;
+
+        if(firstArticle.getTfIdfs() == null || secondArticle.getTfIdfs() == null){
+            return 0;
+        }
+
+        for (final Map.Entry<String, Double> tfIdf : firstArticle.getTfIdfs().entrySet()) {
+            fractionNumerator += tfIdf.getValue() * secondArticle.getTfIdfs().getOrDefault(tfIdf.getKey(), 0d);
+            firstArticleNormalizer += Math.pow(tfIdf.getValue(), 2);
+        }
+        firstArticleNormalizer = Math.sqrt(firstArticleNormalizer);
+
+        for (final Map.Entry<String, Double> tfIdf : secondArticle.getTfIdfs().entrySet()) {
+            secondArticleNormalizer += Math.pow(tfIdf.getValue(), 2);
+        }
+        secondArticleNormalizer = Math.sqrt(secondArticleNormalizer);
+
+        final double fractionDenominator = firstArticleNormalizer * secondArticleNormalizer;
+        if (fractionDenominator == 0) {
+            return 0;
+        }
+        return fractionNumerator / fractionDenominator;
     }
 
     private void writeTfIdfs(final List<NewsArticle> recentArticles) {
@@ -58,7 +105,7 @@ public final class NewsGrouper {
                 final Map<String, Integer> termNumber = new HashMap<>();
                 for (String term : stopWordsRemover.removeStopWords(TextUtils.removeInterpunction(newsArticle.getTitleAndText())).split(" ")) {
                     term = stemmer.stem(term.trim().toLowerCase());
-                    if (term.length() > 0 && isAlphaNumeric(term)) {
+                    if (term.length() > 0 && TextUtils.isTermAlphaWord(term)) {
                         final int frequency = termNumber.getOrDefault(term, 0);
                         final int newFrequency = frequency + 1;
                         termNumber.put(term, newFrequency);
@@ -82,10 +129,5 @@ public final class NewsGrouper {
         }
 
         System.out.println("Wrote TF-IDF metrics");
-    }
-
-    private boolean isAlphaNumeric(final String term) {
-        boolean hasNonAlpha = term.matches("^.*[^a-zA-Z].*$");
-        return !hasNonAlpha;
     }
 }

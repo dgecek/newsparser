@@ -42,7 +42,7 @@ public final class Main {
         final FeaturesFormatter featuresFormatter = new FeaturesFormatter(articleRepository, stemmer, stopWordsRemover, categorizer, negationsManager, sentimentFilter);
         final DataClassifier dataClassifier = new DataClassifier(articleRepository);
         final IdfComputer idfComputer = new IdfComputerImpl(articleRepository, stopWordsRemover, stemmer);
-        final NewsGrouper newsGrouper = new NewsGrouper(articleRepository, stopWordsRemover, idfComputer, stemmer);
+        final NewsGrouper newsGrouper = new NewsGrouper(articleRepository, similarityRepository, stopWordsRemover, idfComputer, stemmer);
 
         //featuresFormatter.saveTrainingAndTestSetsToFile();
 

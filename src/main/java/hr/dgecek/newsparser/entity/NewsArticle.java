@@ -98,7 +98,7 @@ public final class NewsArticle {
         this.body = body;
     }
 
-    public String getTitleAndText(){
+    public String getTitleAndText() {
         return getTitle() + " " + getBody();
     }
 
@@ -143,5 +143,21 @@ public final class NewsArticle {
                 ", \ndate=" + date +
                 ", \nbody='" + body.replace(".", ".\n") + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(final Object otherObject) {
+        if (otherObject == null) {
+            return false;
+        }
+
+        NewsArticle otherArticle;
+        if (otherObject instanceof NewsArticle) {
+            otherArticle = (NewsArticle) otherObject;
+        } else {
+            return false;
+        }
+
+        return url != null && url.equals(otherArticle.url);
     }
 }
