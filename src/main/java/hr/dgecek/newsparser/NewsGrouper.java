@@ -49,26 +49,32 @@ public final class NewsGrouper {
     private void writeSimilarities(final List<NewsArticle> recentArticles) {
         int numberOfSimilarities = 0;
         for (final NewsArticle firstNewsArticle : recentArticles) {
+            if (firstNewsArticle == null) {
+                continue;
+            }
+            final boolean similarityExistsForArticleId = similarityRepository.similarityExistsForArticleId(firstNewsArticle.getId());
+            if (similarityExistsForArticleId || !CategorizerImpl.NEWS_CATEGORY.equals(firstNewsArticle.getCategory())) {
+                continue;
+            }
             for (final NewsArticle secondNewsArticle : recentArticles) {
-                if (firstNewsArticle != null && secondNewsArticle != null &&
-                        !firstNewsArticle.equals(secondNewsArticle) &&
-                        !similarityRepository.similarityExistsForArticleId(firstNewsArticle.getId()) &&
-                        CategorizerImpl.NEWS_CATEGORY.equals(firstNewsArticle.getCategory()) &&
+                if (!firstNewsArticle.equals(secondNewsArticle) &&
                         CategorizerImpl.NEWS_CATEGORY.equals(secondNewsArticle.getCategory())) {
                     final Similarity similarity = new Similarity();
                     similarity.setFirstArticleId(firstNewsArticle.getId());
                     similarity.setSecondArticleId(secondNewsArticle.getId());
+                    similarity.setDate(firstNewsArticle.getDate());
 
                     final double cosineSimilarity = computeCosineSimilarity(firstNewsArticle, secondNewsArticle);
                     similarity.setSimilarity(cosineSimilarity);
                     similarityRepository.addSimilarity(similarity);
+
+                    System.out.println("similarity: " + firstNewsArticle.getUrl() + " " + secondNewsArticle.getUrl());
                     numberOfSimilarities++;
                 }
             }
         }
 
         System.out.println("Wrote " + numberOfSimilarities + "similarities");
-
     }
 
     private double computeCosineSimilarity(final NewsArticle firstArticle, final NewsArticle secondArticle) {
@@ -76,7 +82,7 @@ public final class NewsGrouper {
         double firstArticleNormalizer = 0;
         double secondArticleNormalizer = 0;
 
-        if(firstArticle.getTfIdfs() == null || secondArticle.getTfIdfs() == null){
+        if (firstArticle.getTfIdfs() == null || secondArticle.getTfIdfs() == null) {
             return 0;
         }
 

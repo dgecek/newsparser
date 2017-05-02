@@ -73,10 +73,10 @@ public final class NewsDownloader {
         dataStore.clearStatistics();
     }
 
-    private void saveAllArticlesFromLinks(final Elements links, final PortalInfo portal) throws InterruptedException {
+    private void saveAllArticlesFromLinks(final Elements links, final PortalInfo portalInfo) throws InterruptedException {
         for (final Element link : links) {
             final String articleUrl = link.attr(HREF_SELECTOR);
-            if (portal.checkNewsURLRegex(articleUrl) && !isArticleAlreadySaved(articleUrl)) {
+            if (portalInfo.checkNewsURLRegex(articleUrl) && !isArticleAlreadySaved(articleUrl)) {
                 final NewsArticle article = new NewsArticle();
 
                 if (triedUrls.contains(articleUrl)) {
@@ -84,10 +84,10 @@ public final class NewsDownloader {
                 } else {
                     triedUrls.add(articleUrl);
                 }
-                article.setUrl(articleUrl);
+                article.setUrl(portalInfo.getAbsoluteUrl(articleUrl));
 
                 waitBeforeNextRequest();
-                final Document articleDOM = getArticleDocument(portal, article);
+                final Document articleDOM = getArticleDocument(portalInfo, article);
 
                 if (articleDOM == null) {
                     waitIfConnectionRefused();
@@ -97,14 +97,14 @@ public final class NewsDownloader {
                 final String title = getTitle(articleDOM);
                 article.setTitle(title);
 
-                final String unparsedArticle = articleDOM.select(portal.getArticleSelector()).toString();
+                final String unparsedArticle = articleDOM.select(portalInfo.getArticleSelector()).toString();
                 final String parsedArticle = TextUtils.removeHTMLAndJS(unparsedArticle);
 
                 article.setBody(parsedArticle);
-                article.setCategory(portal.getCategoryFromUrl(article.getUrl()));
-                article.setPortal(portal.getName());
+                article.setCategory(portalInfo.getCategoryFromUrl(article.getUrl()));
+                article.setPortal(portalInfo.getName());
                 article.setDate(dateProvider.getCurrentDate());
-                article.setUrlToImage(getMainImageFromPage(articleDOM));
+                article.setUrlToImage(portalInfo.getAbsoluteUrl(getMainImageFromPage(articleDOM)));
 
                 dataStore.addArticle(article);
             }

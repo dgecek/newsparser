@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 /**
  * Created by dgecek on 01.11.16..
  */
-public final class IndexPortalInfo implements PortalInfo {
+public final class IndexPortalInfo extends PortalInfo {
 
     private static final String URL_PATTERN = "clanak\\.aspx\\?category=\\w+&id=\\w+";
     private static final String PORTAL_NAME = "Index";

@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 /**
  * Created by dgecek on 10.11.16..
  */
-public final class TelegramPortalInfo implements PortalInfo {
+public final class TelegramPortalInfo extends PortalInfo {
 
     private static final String PORTAL_NAME = "Telegram";
     private static final String URL_PATTERN = "http://www\\.telegram\\.hr/.+/.+-.+-.+/";

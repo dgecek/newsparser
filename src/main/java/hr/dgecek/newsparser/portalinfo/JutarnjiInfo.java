@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 /**
  * Created by dgecek on 15.11.16..
  */
-public final class JutarnjiInfo implements PortalInfo {
+public final class JutarnjiInfo extends PortalInfo {
 
     private static final String URL_PATTERN = "http://www\\.jutarnji\\.hr/.+/.+/\\w+-\\w+-.+/\\d+/";
     private static final String PORTAL_NAME = "Jutarnji";

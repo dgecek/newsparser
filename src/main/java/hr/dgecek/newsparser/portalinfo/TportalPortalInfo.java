@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 /**
  * Created by dgecek on 27.10.16..
  */
-public final class TportalPortalInfo implements PortalInfo {
+public final class TportalPortalInfo extends PortalInfo {
 
     // example: http://www.tportal.hr/vijesti/hrvatska/450709/USKOK-se-zainteresirao-za-gradnju-nebodera-u-Maksimiru.html
     //private static final String urlPattern = "\\/\\w+\\/\\d+\\/.+\\.html";
