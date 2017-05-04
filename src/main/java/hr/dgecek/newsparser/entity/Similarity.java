@@ -23,6 +23,15 @@ public final class Similarity {
     private ObjectId secondArticleId;
     private double similarity;
     private Date date;
+    private Boolean handNotation;
+
+    public Boolean isHandNotation() {
+        return handNotation;
+    }
+
+    public void setHandNotation(Boolean handNotation) {
+        this.handNotation = handNotation;
+    }
 
     public Date getDate() {
         return date;

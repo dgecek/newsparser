@@ -1,6 +1,12 @@
 package hr.dgecek.newsparser.portalinfo;
 
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.util.Optional;
 import java.util.regex.Pattern;
+
+import static sun.plugin.dom.html.HTMLConstants.ATTR_SRC;
 
 
 /**
@@ -12,6 +18,7 @@ public final class TportalPortalInfo extends PortalInfo {
     //private static final String urlPattern = "\\/\\w+\\/\\d+\\/.+\\.html";
     private static final String URL_PATTERN = ".*www\\.tportal\\.hr/.+/clanak/.+";
     private static final String PORTAL_NAME = "tportal";
+    private static final String ATTR_DATA_SRC = "data-src";
 
     public String getURL() {
         return "";
@@ -49,6 +56,14 @@ public final class TportalPortalInfo extends PortalInfo {
     @Override
     public String getName() {
         return PORTAL_NAME;
+    }
+
+    @Override
+    public Optional<Element> getMainImage(final Elements imageElements) {
+        return imageElements.stream()
+                .map(element -> element.attr(ATTR_SRC, element.attr(ATTR_DATA_SRC)))
+                .filter(element -> element.attr(ATTR_SRC).contains("/media/thumbnail/"))
+                .findFirst();
     }
 
 }

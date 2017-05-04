@@ -14,5 +14,7 @@ public interface SimilarityRepository {
 
     List<Similarity> get(ObjectId firstArticleId);
 
+    List<Similarity> getRecent();
+
     boolean similarityExistsForArticleId(final ObjectId firstArticleId);
 }
