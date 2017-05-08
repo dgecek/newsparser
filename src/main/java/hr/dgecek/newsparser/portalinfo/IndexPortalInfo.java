@@ -6,6 +6,8 @@ import org.jsoup.select.Elements;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+import static sun.plugin.dom.html.HTMLConstants.ATTR_SRC;
+
 /**
  * Created by dgecek on 01.11.16..
  */
@@ -53,7 +55,9 @@ public final class IndexPortalInfo extends PortalInfo {
 
     @Override
     public Optional<Element> getMainImage(final Elements imageElements) {
-        return imageElements.stream()
+        final Optional<Element> mainImageOptional = imageElements.stream()
                 .max(this::findMaxWidth);
+        mainImageOptional.ifPresent(element -> element.attr(ATTR_SRC, getAbsoluteUrl(element.attr(ATTR_SRC)).replace("/mobile", "")));
+        return mainImageOptional;
     }
 }

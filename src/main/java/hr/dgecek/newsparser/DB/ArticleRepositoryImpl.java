@@ -3,6 +3,8 @@ package hr.dgecek.newsparser.DB;
 import com.mongodb.DuplicateKeyException;
 import hr.dgecek.newsparser.date.DateProvider;
 import hr.dgecek.newsparser.entity.NewsArticle;
+import hr.dgecek.newsparser.entity.Similarity;
+import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.query.Criteria;
 
@@ -55,6 +57,13 @@ public final class ArticleRepositoryImpl implements ArticleRepository {
     @Override
     public List<NewsArticle> getAll() {
         return dataStore.find(NewsArticle.class).asList();
+    }
+
+    @Override
+    public NewsArticle get(final ObjectId id) {
+        return dataStore.find(NewsArticle.class)
+                .field("_id").equal(id)
+                .get();
     }
 
     @Override

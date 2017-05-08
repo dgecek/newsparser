@@ -27,6 +27,11 @@ public class SimilarityRepositoryImpl implements SimilarityRepository {
     }
 
     @Override
+    public void update(final Similarity similarity) {
+        datastore.save(similarity);
+    }
+
+    @Override
     public List<Similarity> get(final ObjectId firstArticleId) {
         return datastore.find(Similarity.class)
                 .field("firstArticleId").equal(firstArticleId)
@@ -37,6 +42,13 @@ public class SimilarityRepositoryImpl implements SimilarityRepository {
     public List<Similarity> getRecent(){
         return datastore.find(Similarity.class)
                 .field("date").greaterThan(dateProvider.getDateNumberOfDaysAgo(3))
+                .asList();
+    }
+
+    @Override
+    public List<Similarity> getAnnotated() {
+        return datastore.find(Similarity.class)
+                .field("handNotation").exists()
                 .asList();
     }
 

@@ -30,12 +30,12 @@ public final class Main {
         final DateProvider dateProvider = new DateProviderImpl();
         final Datastore datastore = MorphiaManager.getDataStore();
         final ArticleRepository articleRepository = new ArticleRepositoryImpl(datastore, dateProvider);
-        final SimilarityRepository similarityRepository = new SimilarityRepositoryImpl(datastore);
+        final SimilarityRepository similarityRepository = new SimilarityRepositoryImpl(datastore, dateProvider);
 
         final SCStemmer stemmer = new LjubesicPandzicStemmer();
         final StopWordsRemover stopWordsRemover = new StopWordsRemoverImpl();
         final Categorizer categorizer = new CategorizerImpl();
-        final NewsDownloader downloader = new NewsDownloader(articleRepository, dateProvider);
+        final NewsDownloader downloader = new NewsDownloader(articleRepository, dateProvider, categorizer);
         final NewsAnnotator annotator = new NewsAnnotator(articleRepository, categorizer);
         final NegationsManager negationsManager = new NegationsManager();
         final SentimentFilter sentimentFilter = new SentimentFilterImpl(stemmer);
@@ -43,6 +43,7 @@ public final class Main {
         final DataClassifier dataClassifier = new DataClassifier(articleRepository);
         final IdfComputer idfComputer = new IdfComputerImpl(articleRepository, stopWordsRemover, stemmer);
         final NewsGrouper newsGrouper = new NewsGrouper(articleRepository, similarityRepository, stopWordsRemover, idfComputer, stemmer);
+        final SimilarityAnottator similarityAnottator = new SimilarityAnottator(similarityRepository, articleRepository);
 
         //featuresFormatter.saveTrainingAndTestSetsToFile();
 
@@ -52,6 +53,8 @@ public final class Main {
         //dataClassifier.trainAndTest();
 
         //newsGrouper.start();
+
+        //similarityAnottator.printResults();
 
         while (true) {
             downloader.downloadNews();

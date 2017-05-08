@@ -1,6 +1,7 @@
 package hr.dgecek.newsparser;
 
 import hr.dgecek.newsparser.DB.ArticleRepository;
+import hr.dgecek.newsparser.categorizer.Categorizer;
 import hr.dgecek.newsparser.date.DateProvider;
 import hr.dgecek.newsparser.entity.NewsArticle;
 import hr.dgecek.newsparser.portalinfo.*;
@@ -21,16 +22,17 @@ import java.util.Optional;
  */
 public final class NewsDownloader {
 
-    private static final String LINKS_SELECTOR = "a[href]";
-    private static final String HREF_SELECTOR = "href";
-    private static final String IMG_TAG = "img";
+    public static final String LINKS_SELECTOR = "a[href]";
+    public static final String HREF_SELECTOR = "href";
+    public static final String IMG_TAG = "img";
     public static final String SRC_ATTR = "src";
+    public static final String WIDTH_KEY = "width";
+
 
     private static final int CONNECTION_TIMEOUT = 5000;
     private static final int WAIT_BEFORE_NEXT_CONNECTION_MILLIS = 200;
     private static final long WAIT_IF_CONNECTION_REFUSED_MILLIS = 500;
     private static final List<PortalInfo> portalInfoList;
-    public static final String WIDTH_KEY = "width";
     private static final String META_PROPERTY_TITLE = "meta[property=og:title]";
     private static final String CONTENT_ATTRIBUTE = "content";
     private static final String USER_AGENT = "Mozilla/5.0";
@@ -39,6 +41,8 @@ public final class NewsDownloader {
     private final ArticleRepository dataStore;
     private final List<NewsArticle> recentArticles;
     private final DateProvider dateProvider;
+    private final Categorizer categorizer;
+
     private final List<String> triedUrls = new ArrayList<>();
 
     static {
@@ -52,11 +56,13 @@ public final class NewsDownloader {
         portalInfoList.add(new IndexPortalInfo());
     }
 
-
-    public NewsDownloader(final ArticleRepository datastore, final DateProvider dateProvider) {
+    public NewsDownloader(final ArticleRepository datastore,
+                          final DateProvider dateProvider,
+                          final Categorizer categorizer) {
         this.dataStore = datastore;
         this.recentArticles = datastore.getRecentArticles();
         this.dateProvider = dateProvider;
+        this.categorizer = categorizer;
     }
 
     public void downloadNews() throws IOException, InterruptedException {
@@ -101,7 +107,7 @@ public final class NewsDownloader {
                 final String parsedArticle = TextUtils.removeHTMLAndJS(unparsedArticle);
 
                 article.setBody(parsedArticle);
-                article.setCategory(portalInfo.getCategoryFromUrl(article.getUrl()));
+                article.setCategory(categorizer.getCategory(portalInfo.getCategoryFromUrl(article.getUrl())));
                 article.setPortal(portalInfo.getName());
                 article.setDate(dateProvider.getCurrentDate());
                 article.setUrlToImage(portalInfo.getAbsoluteUrl(getMainImageFromPage(articleDOM, portalInfo)));
