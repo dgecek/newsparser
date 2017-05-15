@@ -1,5 +1,7 @@
 package hr.dgecek.newsparser.stopwordremover;
 
+import hr.dgecek.newsparser.NegationsManager;
+
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -13,8 +15,10 @@ public final class StopWordsRemoverImpl implements StopWordsRemover {
     private static final String PATH = "/home/dgecek/projects/intellij/annotatedNews/stopwords.txt";
 
     private final List<String> stopWords;
+    private final NegationsManager negationsManager;
 
-    public StopWordsRemoverImpl() {
+    public StopWordsRemoverImpl(final NegationsManager negationsManager) {
+        this.negationsManager = negationsManager;
         this.stopWords = new ArrayList<>(200);
         fillStopWords();
     }
@@ -31,7 +35,7 @@ public final class StopWordsRemoverImpl implements StopWordsRemover {
     }
 
     @Override
-    public String removeStopWords(final String string) {
+    public String removeStopWordsLeaveNegations(final String string) {
         final String[] words = string.split(" ");
         for (int i = 0; i< words.length; i++) {
             if(stopWords.contains(words[i])){
@@ -39,5 +43,10 @@ public final class StopWordsRemoverImpl implements StopWordsRemover {
             }
         }
         return String.join(" ", words);
+    }
+
+    @Override
+    public String removeStopWordsAndNegations(final String string) {
+        return negationsManager.removeNegations(removeStopWordsLeaveNegations(string));
     }
 }

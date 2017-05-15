@@ -32,12 +32,12 @@ public final class Main {
         final ArticleRepository articleRepository = new ArticleRepositoryImpl(datastore, dateProvider);
         final SimilarityRepository similarityRepository = new SimilarityRepositoryImpl(datastore, dateProvider);
 
+        final NegationsManager negationsManager = new NegationsManager();
         final SCStemmer stemmer = new LjubesicPandzicStemmer();
-        final StopWordsRemover stopWordsRemover = new StopWordsRemoverImpl();
+        final StopWordsRemover stopWordsRemover = new StopWordsRemoverImpl(negationsManager);
         final Categorizer categorizer = new CategorizerImpl();
         final NewsDownloader downloader = new NewsDownloader(articleRepository, dateProvider, categorizer);
         final NewsAnnotator annotator = new NewsAnnotator(articleRepository, categorizer);
-        final NegationsManager negationsManager = new NegationsManager();
         final SentimentFilter sentimentFilter = new SentimentFilterImpl(stemmer);
         final FeaturesFormatter featuresFormatter = new FeaturesFormatter(articleRepository, stemmer, stopWordsRemover, categorizer, negationsManager, sentimentFilter);
         final DataClassifier dataClassifier = new DataClassifier(articleRepository);

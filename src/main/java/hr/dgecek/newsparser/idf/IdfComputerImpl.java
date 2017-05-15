@@ -28,7 +28,7 @@ public final class IdfComputerImpl implements IdfComputer {
             if (CategorizerImpl.NEWS_CATEGORY.equals(article.getCategory())) {
                 numberOfDocuments++;
                 final Set<String> termsInArticle = new HashSet<>();
-                for (final String term : stopWordsRemover.removeStopWords(TextUtils.removeInterpunction(article.getTitleAndText())).split(" ")){
+                for (final String term : (TextUtils.removeInterpunction(article.getTitleAndText())).split(" ")){
                     if(term.trim().length() > 0 && TextUtils.isTermAlphaWord(term)) {
                         termsInArticle.add(stemmer.stem(term).trim().toLowerCase());
                     }

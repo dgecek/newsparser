@@ -10,9 +10,8 @@ import hr.dgecek.newsparser.stemmer.SCStemmer;
 import hr.dgecek.newsparser.stopwordremover.StopWordsRemover;
 import hr.dgecek.newsparser.utils.TextUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
@@ -22,6 +21,7 @@ import java.util.stream.Stream;
 public final class NewsGrouper {
 
     private static final double K = 0.5;
+    public static final double SIMILARITY_EDGE = 0.196;
 
     private final ArticleRepository articleRepository;
     private final SimilarityRepository similarityRepository;
@@ -44,6 +44,83 @@ public final class NewsGrouper {
     public void start() {
         writeTfIdfs(articleRepository.getRecentArticles());
         writeSimilarities(articleRepository.getRecentArticles());
+        writeArticleSubjects(similarityRepository.getRecent());
+    }
+
+    private void writeArticleSubjects(final List<Similarity> recentSimilarities) {
+        final List<Set<NewsArticle>> listOfNewsArticleSets = new ArrayList<>();
+
+        // group articles
+        for (final Similarity similarity : recentSimilarities) {
+            if (similarity.getSimilarity() > SIMILARITY_EDGE) {
+                final NewsArticle firstArticle = articleRepository.get(similarity.getFirstArticleId());
+                final NewsArticle secondArticle = articleRepository.get(similarity.getSecondArticleId());
+
+                final Optional<Set<NewsArticle>> firstArticleSetOptional = getArticleSetInArray(firstArticle, listOfNewsArticleSets);
+                final Optional<Set<NewsArticle>> secondArticleSetOptional = getArticleSetInArray(secondArticle, listOfNewsArticleSets);
+
+                if (firstArticleSetOptional.isPresent()) {
+                    firstArticleSetOptional.ifPresent(newsArticles -> newsArticles.add(secondArticle));
+                } else if (secondArticleSetOptional.isPresent()) {
+                    secondArticleSetOptional.ifPresent(newsArticles -> newsArticles.add(firstArticle));
+                } else {
+                    final HashSet<NewsArticle> similaritySet = new HashSet<>();
+                    similaritySet.add(firstArticle);
+                    similaritySet.add(secondArticle);
+
+                    listOfNewsArticleSets.add(similaritySet);
+                }
+            }
+        }
+
+        for (final Set<NewsArticle> newsArticleSet : listOfNewsArticleSets) {
+            final Set<String> subjects = new HashSet<>();
+
+            //add first n tfIdfs to subjects
+            for (final NewsArticle newsArticle : newsArticleSet) {
+                subjects.addAll(
+                        newsArticle.getTfIdfs().entrySet().stream()
+                                .sorted((entry1, entry2) -> (int) ((entry2.getValue() - entry1.getValue()) * 10))
+                                .limit(8)
+                                .map(Map.Entry::getKey)
+                                .collect(Collectors.toList())
+                );
+            }
+
+            //remove uncommon
+            for (final NewsArticle newsArticle : newsArticleSet) {
+                final Iterator<String> subjectsIterator = subjects.iterator();
+                while (subjectsIterator.hasNext()) {
+                    final String subject = subjectsIterator.next();
+                    if (!newsArticle.getTfIdfs().containsKey(subject)) {
+                        subjectsIterator.remove();
+                    }
+                }
+            }
+
+            System.out.println();
+            subjects.forEach(subject -> System.out.print(subject + ", "));
+
+            for(final NewsArticle newsArticle : newsArticleSet){
+                newsArticle.setSubjects(subjects);
+                articleRepository.update(newsArticle);
+            }
+        }
+
+
+    }
+
+    private Optional<Set<NewsArticle>> getArticleSetInArray(final NewsArticle element, final List<Set<NewsArticle>> listOfNewsArticleSets) {
+        /*for (final Set<NewsArticle> newsArticleSet : listOfNewsArticleSets) {
+            if (newsArticleSet.contains(element)) {
+                return Optional.of(newsArticleSet);
+            }
+        }
+        return Optional.empty();*/
+
+       return listOfNewsArticleSets.stream()
+                .filter(newsArticleSet -> newsArticleSet.contains(element))
+                .findFirst();
     }
 
     private void writeSimilarities(final List<NewsArticle> recentArticles) {
@@ -109,7 +186,7 @@ public final class NewsGrouper {
             if (newsArticle.getTfIdfs() == null && CategorizerImpl.NEWS_CATEGORY.equals(newsArticle.getCategory())) {
                 int maximumFrequency = 0;
                 final Map<String, Integer> termNumber = new HashMap<>();
-                for (String term : stopWordsRemover.removeStopWords(TextUtils.removeInterpunction(newsArticle.getTitleAndText())).split(" ")) {
+                for (String term : stopWordsRemover.removeStopWordsAndNegations(TextUtils.removeInterpunction(newsArticle.getTitleAndText())).split(" ")) {
                     term = stemmer.stem(term.trim().toLowerCase());
                     if (term.length() > 0 && TextUtils.isTermAlphaWord(term)) {
                         final int frequency = termNumber.getOrDefault(term, 0);
