@@ -44,6 +44,7 @@ public final class Main {
         final IdfComputer idfComputer = new IdfComputerImpl(articleRepository, stopWordsRemover, stemmer);
         final NewsGrouper newsGrouper = new NewsGrouper(articleRepository, similarityRepository, stopWordsRemover, idfComputer, stemmer);
         final SimilarityAnottator similarityAnottator = new SimilarityAnottator(similarityRepository, articleRepository);
+        final NewsAnalyzer analyzer = new NewsAnalyzer();
 
         //featuresFormatter.saveTrainingAndTestSetsToFile();
 
@@ -63,6 +64,7 @@ public final class Main {
             dataClassifier.classify(articleLines);
 
             newsGrouper.start();
+            analyzer.start();
 
             Thread.sleep(TIME_BETWEEN_DOWNLOADING);
         }

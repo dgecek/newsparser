@@ -81,7 +81,7 @@ public final class NewsGrouper {
                 subjects.addAll(
                         newsArticle.getTfIdfs().entrySet().stream()
                                 .sorted((entry1, entry2) -> (int) ((entry2.getValue() - entry1.getValue()) * 10))
-                                .limit(8)
+                                .limit(10)
                                 .map(Map.Entry::getKey)
                                 .collect(Collectors.toList())
                 );

@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * Created by dgecek on 04.05.17..
  */
-public class SimilarityAnottator {
+public final class SimilarityAnottator {
 
 
     private static final String ANNOTATION_STARTED_STRING = "ANNOTATION STARTED!";

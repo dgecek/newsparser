@@ -56,9 +56,9 @@ public final class IndexPortalInfo extends PortalInfo {
     @Override
     public Optional<Element> getMainImage(final Elements imageElements) {
         final Optional<Element> mainImageOptional = imageElements.stream()
-                .filter(element -> element.attr(ATTR_SRC).contains("index.hr/thumbnail.ashx"))
+                .filter(element -> element.attr(ATTR_SRC).contains("thumbnail.ashx"))
                 .max(this::findMaxWidth);
-        mainImageOptional.ifPresent(element -> element.attr(ATTR_SRC, getAbsoluteUrl(element.attr(ATTR_SRC)).replace("/mobile", "")));
+        // mainImageOptional.ifPresent(element -> element.attr(ATTR_SRC, getAbsoluteUrl(element.attr(ATTR_SRC)).replace("/mobile", "")));
         return mainImageOptional;
     }
 }
