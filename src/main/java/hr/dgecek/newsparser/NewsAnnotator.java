@@ -17,12 +17,14 @@ import java.util.List;
  */
 public final class NewsAnnotator {
 
+    public static final String POSITIVE = "positive";
+    public static final String NEGATIVE = "negative";
+    public static final String NEUTRAL = "neutral";
+
     private static final String ANNOTATION_STARTED_STRING = "ANNOTATION STARTED!";
     private static final String PLEASE_CHOOSE_STRING = "Please choose:\n (1) positive\n (2) negative\n (3) neutral\n (4) pass";
     private static final String BAD_CHOISE_STRING = "Please choose correctly.";
-    static final String POSITIVE = "positive";
-    static final String NEGATIVE = "negative";
-    static final String NEUTRAL = "neutral";
+
     private static final String PASS = "pass";
     private final ArticleRepository datastore;
     private final BufferedReader bufferedReader;

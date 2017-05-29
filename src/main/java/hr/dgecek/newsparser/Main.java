@@ -8,6 +8,8 @@ import hr.dgecek.newsparser.date.DateProviderImpl;
 import hr.dgecek.newsparser.entity.NewsArticle;
 import hr.dgecek.newsparser.idf.IdfComputer;
 import hr.dgecek.newsparser.idf.IdfComputerImpl;
+import hr.dgecek.newsparser.newsstatistics.TopicsStatisticsRepository;
+import hr.dgecek.newsparser.newsstatistics.TopicsStatisticsRepositoryMemoryImpl;
 import hr.dgecek.newsparser.sentimentfilter.SentimentFilter;
 import hr.dgecek.newsparser.sentimentfilter.SentimentFilterImpl;
 import hr.dgecek.newsparser.stemmer.LjubesicPandzicStemmer;
@@ -44,7 +46,8 @@ public final class Main {
         final IdfComputer idfComputer = new IdfComputerImpl(articleRepository, stopWordsRemover, stemmer);
         final NewsGrouper newsGrouper = new NewsGrouper(articleRepository, similarityRepository, stopWordsRemover, idfComputer, stemmer);
         final SimilarityAnottator similarityAnottator = new SimilarityAnottator(similarityRepository, articleRepository);
-        final NewsAnalyzer analyzer = new NewsAnalyzer();
+        final TopicsStatisticsRepository topicsStatisticsRepository = new TopicsStatisticsRepositoryMemoryImpl();
+        final NewsAnalyzer analyzer = new NewsAnalyzer(articleRepository, stemmer, topicsStatisticsRepository);
 
         //featuresFormatter.saveTrainingAndTestSetsToFile();
 
