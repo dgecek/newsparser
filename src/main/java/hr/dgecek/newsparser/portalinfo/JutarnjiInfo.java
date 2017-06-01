@@ -1,11 +1,15 @@
 package hr.dgecek.newsparser.portalinfo;
 
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
  * Created by dgecek on 15.11.16..
  */
-public final class JutarnjiInfo implements PortalInfo {
+public final class JutarnjiInfo extends PortalInfo {
 
     private static final String URL_PATTERN = "http://www\\.jutarnji\\.hr/.+/.+/\\w+-\\w+-.+/\\d+/";
     private static final String PORTAL_NAME = "Jutarnji";
@@ -25,7 +29,7 @@ public final class JutarnjiInfo implements PortalInfo {
 
     @Override
     public String getArticleSelector() {
-        return "#CImaincontent" ;
+        return "#CImaincontent";
     }
 
     @Override
@@ -37,7 +41,7 @@ public final class JutarnjiInfo implements PortalInfo {
     public String getCategoryFromUrl(final String url) {
         try {
             return url.split("http://www\\.jutarnji\\.hr/")[1].split("/")[0];
-        } catch(final ArrayIndexOutOfBoundsException e){
+        } catch (final ArrayIndexOutOfBoundsException e) {
             return null;
         }
     }
@@ -46,4 +50,13 @@ public final class JutarnjiInfo implements PortalInfo {
     public String getName() {
         return PORTAL_NAME;
     }
+
+    @Override
+    public Optional<Element> getMainImage(final Elements imageElements) {
+        return imageElements.stream()
+                .filter(element -> "LANDSCAPE".equals(element.attr("data-variant")))
+                .findFirst();
+    }
+
+
 }

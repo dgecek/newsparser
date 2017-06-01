@@ -1,5 +1,6 @@
 package hr.dgecek.newsparser.DB;
 
+import hr.dgecek.newsparser.date.DateProvider;
 import hr.dgecek.newsparser.entity.Similarity;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
@@ -12,9 +13,12 @@ import java.util.List;
 public class SimilarityRepositoryImpl implements SimilarityRepository {
 
     private final Datastore datastore;
+    private final DateProvider dateProvider;
 
-    public SimilarityRepositoryImpl(final Datastore datastore) {
+    public SimilarityRepositoryImpl(final Datastore datastore,
+                                    final DateProvider dateProvider) {
         this.datastore = datastore;
+        this.dateProvider = dateProvider;
     }
 
     @Override
@@ -23,9 +27,28 @@ public class SimilarityRepositoryImpl implements SimilarityRepository {
     }
 
     @Override
+    public void update(final Similarity similarity) {
+        datastore.save(similarity);
+    }
+
+    @Override
     public List<Similarity> get(final ObjectId firstArticleId) {
         return datastore.find(Similarity.class)
                 .field("firstArticleId").equal(firstArticleId)
+                .asList();
+    }
+
+    @Override
+    public List<Similarity> getRecent(){
+        return datastore.find(Similarity.class)
+                .field("date").greaterThan(dateProvider.getDateNumberOfDaysAgo(3))
+                .asList();
+    }
+
+    @Override
+    public List<Similarity> getAnnotated() {
+        return datastore.find(Similarity.class)
+                .field("handNotation").exists()
                 .asList();
     }
 

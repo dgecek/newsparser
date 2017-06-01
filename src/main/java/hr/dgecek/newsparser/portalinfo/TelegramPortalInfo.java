@@ -1,11 +1,17 @@
 package hr.dgecek.newsparser.portalinfo;
 
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.util.Optional;
 import java.util.regex.Pattern;
+
+import static sun.plugin.dom.html.HTMLConstants.ATTR_SRC;
 
 /**
  * Created by dgecek on 10.11.16..
  */
-public final class TelegramPortalInfo implements PortalInfo {
+public final class TelegramPortalInfo extends PortalInfo {
 
     private static final String PORTAL_NAME = "Telegram";
     private static final String URL_PATTERN = "http://www\\.telegram\\.hr/.+/.+-.+-.+/";
@@ -38,7 +44,7 @@ public final class TelegramPortalInfo implements PortalInfo {
         String category;
         try {
             category = url.split("http://www\\.telegram\\.hr/")[1].split("/")[0];
-        } catch(ArrayIndexOutOfBoundsException e){
+        } catch (ArrayIndexOutOfBoundsException e) {
             category = null;
         }
 
@@ -48,5 +54,12 @@ public final class TelegramPortalInfo implements PortalInfo {
     @Override
     public String getName() {
         return PORTAL_NAME;
+    }
+
+    @Override
+    public Optional<Element> getMainImage(final Elements imageElements) {
+        return imageElements.stream()
+                .filter(element -> element.attr(ATTR_SRC).contains("wp-content/uploads"))
+                .max(this::findMaxWidth);
     }
 }

@@ -157,7 +157,7 @@ public final class FeaturesFormatter {
     }
 
     private String format(final String string) {
-        String newString = stopWordsRemover.removeStopWords(string);
+        String newString = stopWordsRemover.removeStopWordsLeaveNegations(string);
         newString = stemmer.stemLine(newString);
         newString = TextUtils.formatInterpunction(newString);
         //newString = removeInterpunction(newString);

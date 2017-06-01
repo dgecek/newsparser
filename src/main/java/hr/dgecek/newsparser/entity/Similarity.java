@@ -6,6 +6,8 @@ import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.utils.IndexDirection;
 
+import java.util.Date;
+
 /**
  * Created by dgecek on 20.04.17..
  */
@@ -20,6 +22,24 @@ public final class Similarity {
     private ObjectId firstArticleId;
     private ObjectId secondArticleId;
     private double similarity;
+    private Date date;
+    private Boolean handNotation;
+
+    public Boolean isHandNotation() {
+        return handNotation;
+    }
+
+    public void setHandNotation(Boolean handNotation) {
+        this.handNotation = handNotation;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
 
     public ObjectId getFirstArticleId() {
         return firstArticleId;

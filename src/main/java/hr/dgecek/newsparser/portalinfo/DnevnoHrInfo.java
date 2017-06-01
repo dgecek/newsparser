@@ -1,11 +1,17 @@
 package hr.dgecek.newsparser.portalinfo;
 
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.util.Optional;
 import java.util.regex.Pattern;
+
+import static hr.dgecek.newsparser.NewsDownloader.SRC_ATTR;
 
 /**
  * Created by dgecek on 19.11.16..
  */
-public final class DnevnoHrInfo implements PortalInfo {
+public final class DnevnoHrInfo extends PortalInfo {
 
     private static final String PORTAL_NAME = "DNEVNO";
     private final String URL_PATTERN = "http://www\\.dnevno\\.hr/.+/\\w+-\\w+-.+-\\d+.*";
@@ -45,5 +51,12 @@ public final class DnevnoHrInfo implements PortalInfo {
     @Override
     public String getName() {
         return PORTAL_NAME;
+    }
+
+    @Override
+    public Optional<Element> getMainImage(final Elements imageElements) {
+        return imageElements.stream()
+                .filter(element -> element.attr(SRC_ATTR).contains(getName().toLowerCase()))
+                .max(this::findMaxWidth);
     }
 }

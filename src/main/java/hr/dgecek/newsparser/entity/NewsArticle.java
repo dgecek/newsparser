@@ -6,6 +6,8 @@ import org.mongodb.morphia.utils.IndexDirection;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by dgecek on 27.10.16..
@@ -29,6 +31,16 @@ public final class NewsArticle {
     private Date date;
     private String urlToImage;
     private HashMap<String, Double> tfIdfs;
+    private HashSet<String> subjects;
+
+    public HashSet<String> getSubjects() {
+        return subjects;
+    }
+
+    public void setSubjects(Set<String> subjects) {
+        this.subjects = new HashSet<>();
+        this.subjects.addAll(subjects);
+    }
 
     public HashMap<String, Double> getTfIdfs() {
         return tfIdfs;
@@ -159,5 +171,10 @@ public final class NewsArticle {
         }
 
         return url != null && url.equals(otherArticle.url);
+    }
+
+    @Override
+    public int hashCode(){
+        return url.hashCode();
     }
 }

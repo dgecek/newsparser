@@ -1,6 +1,7 @@
 package hr.dgecek.newsparser.DB;
 
 import hr.dgecek.newsparser.entity.NewsArticle;
+import org.bson.types.ObjectId;
 
 import java.util.List;
 
@@ -12,6 +13,8 @@ public interface ArticleRepository {
     void addArticle(NewsArticle article);
 
     List<NewsArticle> getAll();
+
+    NewsArticle get(ObjectId id);
 
     List<NewsArticle> getNonPredictedArticles();
 

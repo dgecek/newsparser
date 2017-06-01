@@ -42,4 +42,14 @@ public final class NegationsManager {
             return negations.deleteCharAt(negations.length() - 1).toString();
         }
     }
+
+    public String removeNegations(final String string){
+        final String[] words = string.split(" ");
+        for (int i = 0; i< words.length; i++) {
+            if(negations.contains(words[i])){
+                words[i] = "";
+            }
+        }
+        return String.join(" ", words);
+    }
 }

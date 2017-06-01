@@ -1,6 +1,7 @@
 package hr.dgecek.newsparser;
 
 import hr.dgecek.newsparser.DB.ArticleRepository;
+import hr.dgecek.newsparser.categorizer.Categorizer;
 import hr.dgecek.newsparser.date.DateProvider;
 import hr.dgecek.newsparser.entity.NewsArticle;
 import hr.dgecek.newsparser.portalinfo.*;
@@ -21,16 +22,17 @@ import java.util.Optional;
  */
 public final class NewsDownloader {
 
-    private static final String LINKS_SELECTOR = "a[href]";
-    private static final String HREF_SELECTOR = "href";
-    private static final String IMG_TAG = "img";
-    private static final String SRC_ATTR = "src";
+    public static final String LINKS_SELECTOR = "a[href]";
+    public static final String HREF_SELECTOR = "href";
+    public static final String IMG_TAG = "img";
+    public static final String SRC_ATTR = "src";
+    public static final String WIDTH_KEY = "width";
+
 
     private static final int CONNECTION_TIMEOUT = 5000;
     private static final int WAIT_BEFORE_NEXT_CONNECTION_MILLIS = 200;
     private static final long WAIT_IF_CONNECTION_REFUSED_MILLIS = 500;
     private static final List<PortalInfo> portalInfoList;
-    private static final String WIDTH_KEY = "width";
     private static final String META_PROPERTY_TITLE = "meta[property=og:title]";
     private static final String CONTENT_ATTRIBUTE = "content";
     private static final String USER_AGENT = "Mozilla/5.0";
@@ -39,6 +41,8 @@ public final class NewsDownloader {
     private final ArticleRepository dataStore;
     private final List<NewsArticle> recentArticles;
     private final DateProvider dateProvider;
+    private final Categorizer categorizer;
+
     private final List<String> triedUrls = new ArrayList<>();
 
     static {
@@ -52,11 +56,13 @@ public final class NewsDownloader {
         portalInfoList.add(new IndexPortalInfo());
     }
 
-
-    public NewsDownloader(final ArticleRepository datastore, final DateProvider dateProvider) {
+    public NewsDownloader(final ArticleRepository datastore,
+                          final DateProvider dateProvider,
+                          final Categorizer categorizer) {
         this.dataStore = datastore;
         this.recentArticles = datastore.getRecentArticles();
         this.dateProvider = dateProvider;
+        this.categorizer = categorizer;
     }
 
     public void downloadNews() throws IOException, InterruptedException {
@@ -73,10 +79,10 @@ public final class NewsDownloader {
         dataStore.clearStatistics();
     }
 
-    private void saveAllArticlesFromLinks(final Elements links, final PortalInfo portal) throws InterruptedException {
+    private void saveAllArticlesFromLinks(final Elements links, final PortalInfo portalInfo) throws InterruptedException {
         for (final Element link : links) {
             final String articleUrl = link.attr(HREF_SELECTOR);
-            if (portal.checkNewsURLRegex(articleUrl) && !isArticleAlreadySaved(articleUrl)) {
+            if (portalInfo.checkNewsURLRegex(articleUrl) && !isArticleAlreadySaved(articleUrl)) {
                 final NewsArticle article = new NewsArticle();
 
                 if (triedUrls.contains(articleUrl)) {
@@ -84,10 +90,10 @@ public final class NewsDownloader {
                 } else {
                     triedUrls.add(articleUrl);
                 }
-                article.setUrl(articleUrl);
+                article.setUrl(portalInfo.getAbsoluteUrl(articleUrl));
 
                 waitBeforeNextRequest();
-                final Document articleDOM = getArticleDocument(portal, article);
+                final Document articleDOM = getArticleDocument(portalInfo, article);
 
                 if (articleDOM == null) {
                     waitIfConnectionRefused();
@@ -97,41 +103,26 @@ public final class NewsDownloader {
                 final String title = getTitle(articleDOM);
                 article.setTitle(title);
 
-                final String unparsedArticle = articleDOM.select(portal.getArticleSelector()).toString();
+                final String unparsedArticle = articleDOM.select(portalInfo.getArticleSelector()).toString();
                 final String parsedArticle = TextUtils.removeHTMLAndJS(unparsedArticle);
 
                 article.setBody(parsedArticle);
-                article.setCategory(portal.getCategoryFromUrl(article.getUrl()));
-                article.setPortal(portal.getName());
+                article.setCategory(categorizer.getCategory(portalInfo.getCategoryFromUrl(article.getUrl())));
+                article.setPortal(portalInfo.getName());
                 article.setDate(dateProvider.getCurrentDate());
-                article.setUrlToImage(getMainImageFromPage(articleDOM));
+                article.setUrlToImage(portalInfo.getAbsoluteUrl(getMainImageFromPage(articleDOM, portalInfo)));
 
                 dataStore.addArticle(article);
             }
         }
     }
 
-    private String getMainImageFromPage(final Document articleDOM) {
+    private String getMainImageFromPage(final Document articleDOM, final PortalInfo portalInfo) {
         final Elements imageElements = articleDOM.getElementsByTag(IMG_TAG);
-        final Optional<Element> largestImageOptional = imageElements.stream()
-                .max((o1, o2) -> {
-                    Integer width1, width2;
-                    try {
-                        width1 = Integer.valueOf(o1.attr(WIDTH_KEY));
-                    } catch (final NumberFormatException exception) {
-                        return -1;
-                    }
-                    try {
-                        width2 = Integer.valueOf(o2.attr(WIDTH_KEY));
-                    } catch (final NumberFormatException exception) {
-                        return 1;
-                    }
+        final Optional<Element> mainImageOptional = portalInfo.getMainImage(imageElements);
 
-                    return width1 - width2;
-                });
-
-        if (largestImageOptional.isPresent()) {
-            final Element largestImage = largestImageOptional.get();
+        if (mainImageOptional.isPresent()) {
+            final Element largestImage = mainImageOptional.get();
             return largestImage.attr(SRC_ATTR);
         } else {
             return "";
@@ -160,7 +151,7 @@ public final class NewsDownloader {
 
     private Document getArticleDocument(final PortalInfo portal, final NewsArticle article) {
         try {
-            final Connection connection = getConnection(portal.getURL() + article.getUrl());
+            final Connection connection = getConnection(portal.getAbsoluteUrl(article.getUrl()));
             return connection.get();
         } catch (IOException e) {
             e.printStackTrace();

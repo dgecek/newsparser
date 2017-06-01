@@ -8,6 +8,8 @@ import hr.dgecek.newsparser.date.DateProviderImpl;
 import hr.dgecek.newsparser.entity.NewsArticle;
 import hr.dgecek.newsparser.idf.IdfComputer;
 import hr.dgecek.newsparser.idf.IdfComputerImpl;
+import hr.dgecek.newsparser.newsstatistics.TopicsStatisticsRepository;
+import hr.dgecek.newsparser.newsstatistics.TopicsStatisticsRepositoryMemoryImpl;
 import hr.dgecek.newsparser.sentimentfilter.SentimentFilter;
 import hr.dgecek.newsparser.sentimentfilter.SentimentFilterImpl;
 import hr.dgecek.newsparser.stemmer.LjubesicPandzicStemmer;
@@ -30,19 +32,22 @@ public final class Main {
         final DateProvider dateProvider = new DateProviderImpl();
         final Datastore datastore = MorphiaManager.getDataStore();
         final ArticleRepository articleRepository = new ArticleRepositoryImpl(datastore, dateProvider);
-        final SimilarityRepository similarityRepository = new SimilarityRepositoryImpl(datastore);
+        final SimilarityRepository similarityRepository = new SimilarityRepositoryImpl(datastore, dateProvider);
 
-        final SCStemmer stemmer = new LjubesicPandzicStemmer();
-        final StopWordsRemover stopWordsRemover = new StopWordsRemoverImpl();
-        final Categorizer categorizer = new CategorizerImpl();
-        final NewsDownloader downloader = new NewsDownloader(articleRepository, dateProvider);
-        final NewsAnnotator annotator = new NewsAnnotator(articleRepository, categorizer);
         final NegationsManager negationsManager = new NegationsManager();
+        final SCStemmer stemmer = new LjubesicPandzicStemmer();
+        final StopWordsRemover stopWordsRemover = new StopWordsRemoverImpl(negationsManager);
+        final Categorizer categorizer = new CategorizerImpl();
+        final NewsDownloader downloader = new NewsDownloader(articleRepository, dateProvider, categorizer);
+        final NewsAnnotator annotator = new NewsAnnotator(articleRepository, categorizer);
         final SentimentFilter sentimentFilter = new SentimentFilterImpl(stemmer);
         final FeaturesFormatter featuresFormatter = new FeaturesFormatter(articleRepository, stemmer, stopWordsRemover, categorizer, negationsManager, sentimentFilter);
         final DataClassifier dataClassifier = new DataClassifier(articleRepository);
         final IdfComputer idfComputer = new IdfComputerImpl(articleRepository, stopWordsRemover, stemmer);
         final NewsGrouper newsGrouper = new NewsGrouper(articleRepository, similarityRepository, stopWordsRemover, idfComputer, stemmer);
+        final SimilarityAnottator similarityAnottator = new SimilarityAnottator(similarityRepository, articleRepository);
+        final TopicsStatisticsRepository topicsStatisticsRepository = new TopicsStatisticsRepositoryMemoryImpl();
+        final NewsAnalyzer analyzer = new NewsAnalyzer(articleRepository, stemmer, topicsStatisticsRepository);
 
         //featuresFormatter.saveTrainingAndTestSetsToFile();
 
@@ -53,6 +58,8 @@ public final class Main {
 
         //newsGrouper.start();
 
+        //similarityAnottator.printResults();
+
         while (true) {
             downloader.downloadNews();
 
@@ -60,6 +67,7 @@ public final class Main {
             dataClassifier.classify(articleLines);
 
             newsGrouper.start();
+            analyzer.start();
 
             Thread.sleep(TIME_BETWEEN_DOWNLOADING);
         }

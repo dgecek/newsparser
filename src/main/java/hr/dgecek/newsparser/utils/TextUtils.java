@@ -17,6 +17,7 @@ public final class TextUtils {
 
         parsedArticle = parsedArticle.split("<a class=")[0];
         parsedArticle = parsedArticle.split("<script>")[0];
+        parsedArticle = parsedArticle.split("PROČITAJTE JOŠ")[0]; //index
 
         parsedArticle = parsedArticle.replace("\n", "").replace("  ", " ");
 

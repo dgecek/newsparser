@@ -12,7 +12,13 @@ public interface SimilarityRepository {
 
     void addSimilarity(Similarity similarity);
 
+    void update(Similarity similarity);
+
     List<Similarity> get(ObjectId firstArticleId);
+
+    List<Similarity> getRecent();
+
+    List<Similarity> getAnnotated();
 
     boolean similarityExistsForArticleId(final ObjectId firstArticleId);
 }
