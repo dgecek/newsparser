@@ -66,12 +66,15 @@ public final class NewsAnalyzer {
         final List<NewsArticle> articles = articleRepository.getAll();
 
         for (final NewsArticle article : articles) {
-            final HashSet<String> subjects = article.getSubjects();
+            HashSet<String> subjects = article.getSubjects();
             final String title = article.getTitle();
             final String portal = article.getPortal();
             final String sentiment = article.getPredictedSentiment();
 
-            if (subjects != null && title != null) {
+            if (title != null) {
+                if (subjects == null) {
+                    subjects = new HashSet<>();
+                }
                 // if it is in the title it is probably the subject
                 subjects.addAll(Arrays.asList(stemmer.stem(TextUtils.removeInterpunction(title).toLowerCase()).split(" ")));
                 for (final String subject : subjects) {
@@ -80,6 +83,7 @@ public final class NewsAnalyzer {
                     }
                 }
             }
+
         }
 
         printStatistics();
@@ -87,14 +91,22 @@ public final class NewsAnalyzer {
 
     private void printStatistics() {
         final List<TopicStatistics> topicStatisticsList = topicsStatisticsRepository.getAll();
+        Collections.sort(topicStatisticsList, (topicStatistics1, topicStatistics2) ->
+                topicStatistics1.getPortal().charAt(0) - topicStatistics2.getPortal().charAt(0));
 
-        for(final TopicStatistics topicStatistics : topicStatisticsList){
-            System.out.println();
-            System.out.println(topicStatistics.getPortal());
+        String oldPortal = "";
+
+        for (final TopicStatistics topicStatistics : topicStatisticsList) {
+           final String newPortal = topicStatistics.getPortal();
+            if(!oldPortal.equals(newPortal)){
+                System.out.println();
+                System.out.println(newPortal);
+                oldPortal = newPortal;
+            }
             System.out.println(topicStatistics.getSubject());
-            System.out.println(topicStatistics.getStatistics().getPositive());
-            System.out.println(topicStatistics.getStatistics().getNegative());
-            System.out.println(topicStatistics.getStatistics().getNeutral());
+            System.out.println("pos=" + topicStatistics.getStatistics().getPositive() + ", " +
+                    "neg=" + topicStatistics.getStatistics().getNegative() + ", " +
+                    "neu=" + topicStatistics.getStatistics().getNeutral());
         }
     }
 }
