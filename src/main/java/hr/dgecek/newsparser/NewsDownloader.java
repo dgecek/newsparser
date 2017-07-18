@@ -77,6 +77,9 @@ public final class NewsDownloader {
 
         System.out.println(dataStore.getStatistics());
         dataStore.clearStatistics();
+        if (triedUrls.size() > 2000) {
+            triedUrls.clear();
+        }
     }
 
     private void saveAllArticlesFromLinks(final Elements links, final PortalInfo portalInfo) throws InterruptedException {
