@@ -43,7 +43,7 @@ public final class IndexPortalInfo extends PortalInfo {
         //clanak.aspx?category=vijesti&id=931228
         try {
             return url.split("category=")[1].split("&")[0];
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (final ArrayIndexOutOfBoundsException e) {
             return null;
         }
     }

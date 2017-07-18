@@ -10,4 +10,6 @@ public interface TopicsStatisticsRepository {
     void put(String subject, String portal, String sentiment);
 
     List<TopicStatistics> getAll();
+
+    void clear();
 }

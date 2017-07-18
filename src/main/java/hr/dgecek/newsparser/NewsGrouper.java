@@ -101,7 +101,7 @@ public final class NewsGrouper {
             System.out.println();
             subjects.forEach(subject -> System.out.print(subject + ", "));
 
-            for(final NewsArticle newsArticle : newsArticleSet){
+            for (final NewsArticle newsArticle : newsArticleSet) {
                 newsArticle.setSubjects(subjects);
                 articleRepository.update(newsArticle);
             }
@@ -118,7 +118,7 @@ public final class NewsGrouper {
         }
         return Optional.empty();*/
 
-       return listOfNewsArticleSets.stream()
+        return listOfNewsArticleSets.stream()
                 .filter(newsArticleSet -> newsArticleSet.contains(element))
                 .findFirst();
     }

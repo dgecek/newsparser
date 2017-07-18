@@ -62,6 +62,9 @@ public final class TextUtils {
     }
 
     public static boolean isTermAlphaWord(final String term) {
+        if (term == null || "".equals(term.trim())) {
+            return false;
+        }
         boolean hasNonAlpha = term.matches("^.*[^a-zA-Z].*$");
         return !hasNonAlpha;
     }

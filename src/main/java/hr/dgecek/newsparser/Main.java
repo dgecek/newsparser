@@ -19,6 +19,7 @@ import hr.dgecek.newsparser.stopwordremover.StopWordsRemoverImpl;
 import org.mongodb.morphia.Datastore;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.Map;
 
 /**
@@ -28,7 +29,7 @@ public final class Main {
 
     private static final long TIME_BETWEEN_DOWNLOADING = 20 * 60 * 1000;
 
-    public static void main(final String[] args) throws IOException, InterruptedException {
+    public static void main(final String[] args) throws IOException, InterruptedException, ParseException {
         final DateProvider dateProvider = new DateProviderImpl();
         final Datastore datastore = MorphiaManager.getDataStore();
         final ArticleRepository articleRepository = new ArticleRepositoryImpl(datastore, dateProvider);

@@ -36,4 +36,9 @@ public final class TopicsStatisticsRepositoryMemoryImpl implements TopicsStatist
     public List<TopicStatistics> getAll() {
         return topicsStatisticsList;
     }
+
+    @Override
+    public void clear() {
+        topicsStatisticsList.clear();
+    }
 }

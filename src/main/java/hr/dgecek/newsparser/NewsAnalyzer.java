@@ -7,6 +7,8 @@ import hr.dgecek.newsparser.newsstatistics.TopicsStatisticsRepository;
 import hr.dgecek.newsparser.stemmer.SCStemmer;
 import hr.dgecek.newsparser.utils.TextUtils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -52,6 +54,13 @@ public final class NewsAnalyzer {
         topics.add(stemmer.stem("pernar"));
         topics.add(stemmer.stem("bunjac"));
 
+        topics.add(stemmer.stem("hns"));
+        topics.add(stemmer.stem("taritaš"));
+        topics.add(stemmer.stem("vrdoljak"));
+
+        topics.add(stemmer.stem("kerum"));
+        topics.add(stemmer.stem("bandić"));
+
         topics.add(stemmer.stem("todorić"));
         topics.add(stemmer.stem("agrokor"));
         topics.add(stemmer.stem("ledo"));
@@ -62,26 +71,38 @@ public final class NewsAnalyzer {
         topics.add(stemmer.stem("putin"));
     }
 
-    public void start() {
+    public void start() throws ParseException {
         final List<NewsArticle> articles = articleRepository.getAll();
 
+        topicsStatisticsRepository.clear();
+
+        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        final Calendar calendar = new GregorianCalendar();
+        //the date when subjects gathering algorithm is implemented
+        calendar.setTime(sdf.parse("2017-05-15T18:16:00"));
+
+        final Date time = calendar.getTime();
+
         for (final NewsArticle article : articles) {
-            HashSet<String> subjects = article.getSubjects();
+            final Set<String> subjects = article.getSubjects();
             final String title = article.getTitle();
             final String portal = article.getPortal();
             final String sentiment = article.getPredictedSentiment();
+            final Date date = article.getDate();
 
-            if (title != null) {
-                if (subjects == null) {
-                    subjects = new HashSet<>();
+            final Set<String> subjectsAndTitle = new HashSet<>();
+
+            if (date != null && date.after(time) && title != null) {
+                if (subjects != null) {
+                    subjectsAndTitle.addAll(subjects);
                 }
                 // if it is in the title it is probably the subject
-                subjects.addAll(Arrays.asList(stemmer.stem(TextUtils.removeInterpunction(title).toLowerCase()).split(" ")));
-                for (final String subject : subjects) {
-                    if (topics.contains(subject)) {
-                        topicsStatisticsRepository.put(subject, portal, sentiment);
-                    }
-                }
+                subjectsAndTitle.addAll(Arrays.asList(stemmer.stemLine(TextUtils.removeInterpunction(title).toLowerCase()).split(" ")));
+                subjectsAndTitle.stream()
+                        .filter(topics::contains)
+                        .forEach(subject ->
+                                topicsStatisticsRepository.put(subject, portal, sentiment)
+                        );
             }
 
         }
@@ -92,21 +113,25 @@ public final class NewsAnalyzer {
     private void printStatistics() {
         final List<TopicStatistics> topicStatisticsList = topicsStatisticsRepository.getAll();
         Collections.sort(topicStatisticsList, (topicStatistics1, topicStatistics2) ->
-                topicStatistics1.getPortal().charAt(0) - topicStatistics2.getPortal().charAt(0));
+                (topicStatistics1.getPortal().charAt(0) - topicStatistics2.getPortal().charAt(0)) * 1000
+                        + topicStatistics1.getSubject().charAt(0) - topicStatistics2.getSubject().charAt(0));
 
         String oldPortal = "";
 
         for (final TopicStatistics topicStatistics : topicStatisticsList) {
-           final String newPortal = topicStatistics.getPortal();
-            if(!oldPortal.equals(newPortal)){
+            final String newPortal = topicStatistics.getPortal();
+            if (!oldPortal.equals(newPortal)) {
                 System.out.println();
                 System.out.println(newPortal);
                 oldPortal = newPortal;
             }
-            System.out.println(topicStatistics.getSubject());
-            System.out.println("pos=" + topicStatistics.getStatistics().getPositive() + ", " +
-                    "neg=" + topicStatistics.getStatistics().getNegative() + ", " +
-                    "neu=" + topicStatistics.getStatistics().getNeutral());
+            System.out.println();
+            System.out.print(topicStatistics.getSubject());
+            System.out.print(
+                    ", pos=" + topicStatistics.getStatistics().getPositive() + ", " +
+                            "neg=" + topicStatistics.getStatistics().getNegative() + ", " +
+                            "neu=" + topicStatistics.getStatistics().getNeutral()
+            );
         }
     }
 }
