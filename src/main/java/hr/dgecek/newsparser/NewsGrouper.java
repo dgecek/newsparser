@@ -89,13 +89,7 @@ public final class NewsGrouper {
 
             //remove uncommon
             for (final NewsArticle newsArticle : newsArticleSet) {
-                final Iterator<String> subjectsIterator = subjects.iterator();
-                while (subjectsIterator.hasNext()) {
-                    final String subject = subjectsIterator.next();
-                    if (!newsArticle.getTfIdfs().containsKey(subject)) {
-                        subjectsIterator.remove();
-                    }
-                }
+                subjects.removeIf(subject -> !newsArticle.getTfIdfs().containsKey(subject));
             }
 
             System.out.println();
@@ -111,13 +105,6 @@ public final class NewsGrouper {
     }
 
     private Optional<Set<NewsArticle>> getArticleSetInArray(final NewsArticle element, final List<Set<NewsArticle>> listOfNewsArticleSets) {
-        /*for (final Set<NewsArticle> newsArticleSet : listOfNewsArticleSets) {
-            if (newsArticleSet.contains(element)) {
-                return Optional.of(newsArticleSet);
-            }
-        }
-        return Optional.empty();*/
-
         return listOfNewsArticleSets.stream()
                 .filter(newsArticleSet -> newsArticleSet.contains(element))
                 .findFirst();
@@ -145,7 +132,7 @@ public final class NewsGrouper {
                     similarity.setSimilarity(cosineSimilarity);
                     similarityRepository.addSimilarity(similarity);
 
-                    System.out.println("similarity: " + firstNewsArticle.getUrl() + " " + secondNewsArticle.getUrl());
+                    System.out.println("similarity = " + cosineSimilarity + ": " + firstNewsArticle.getUrl() + " " + secondNewsArticle.getUrl());
                     numberOfSimilarities++;
                 }
             }

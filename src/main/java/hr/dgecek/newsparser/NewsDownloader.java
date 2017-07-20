@@ -77,7 +77,7 @@ public final class NewsDownloader {
 
         System.out.println(dataStore.getStatistics());
         dataStore.clearStatistics();
-        if (triedUrls.size() > 2000) {
+        if (triedUrls.size() > 200) {
             triedUrls.clear();
         }
     }

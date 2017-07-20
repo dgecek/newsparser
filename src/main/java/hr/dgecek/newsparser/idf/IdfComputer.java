@@ -6,4 +6,6 @@ package hr.dgecek.newsparser.idf;
 public interface IdfComputer {
 
     double getIdfFor(String term);
+
+    void initialize();
 }

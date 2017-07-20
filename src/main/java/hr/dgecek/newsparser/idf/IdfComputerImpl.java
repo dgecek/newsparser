@@ -14,13 +14,20 @@ import java.util.*;
  */
 public final class IdfComputerImpl implements IdfComputer {
 
-    private final Map<String, Integer> numberOfDocumentsWithTerms = new HashMap<>();
     private final SCStemmer stemmer;
+    private final ArticleRepository articleRepository;
 
     private int numberOfDocuments;
+    private Map<String, Integer> numberOfDocumentsWithTerms;
 
     public IdfComputerImpl(final ArticleRepository articleRepository, final StopWordsRemover stopWordsRemover, final SCStemmer stemmer) {
         this.stemmer = stemmer;
+        this.articleRepository = articleRepository;
+        initialize();
+    }
+
+    public void initialize() {
+        numberOfDocumentsWithTerms = new HashMap<>();
         final List<NewsArticle> articles = articleRepository.getAll();
         numberOfDocuments = 0;
 
@@ -28,8 +35,8 @@ public final class IdfComputerImpl implements IdfComputer {
             if (CategorizerImpl.NEWS_CATEGORY.equals(article.getCategory())) {
                 numberOfDocuments++;
                 final Set<String> termsInArticle = new HashSet<>();
-                for (final String term : (TextUtils.removeInterpunction(article.getTitleAndText())).split(" ")){
-                    if(term.trim().length() > 0 && TextUtils.isTermAlphaWord(term)) {
+                for (final String term : (TextUtils.removeInterpunction(article.getTitleAndText())).split(" ")) {
+                    if (term.trim().length() > 0 && TextUtils.isTermAlphaWord(term)) {
                         termsInArticle.add(stemmer.stem(term).trim().toLowerCase());
                     }
                 }
@@ -40,7 +47,6 @@ public final class IdfComputerImpl implements IdfComputer {
                 }
             }
         }
-
     }
 
     @Override
