@@ -1,8 +1,10 @@
 package hr.dgecek.newsparser;
 
 import hr.dgecek.newsparser.DB.ArticleRepository;
+import hr.dgecek.newsparser.DB.GroupedArticlesRepository;
 import hr.dgecek.newsparser.DB.SimilarityRepository;
 import hr.dgecek.newsparser.categorizer.CategorizerImpl;
+import hr.dgecek.newsparser.entity.ArticlesGroup;
 import hr.dgecek.newsparser.entity.NewsArticle;
 import hr.dgecek.newsparser.entity.Similarity;
 import hr.dgecek.newsparser.idf.IdfComputer;
@@ -12,7 +14,6 @@ import hr.dgecek.newsparser.utils.TextUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 /**
@@ -28,14 +29,18 @@ public final class NewsGrouper {
     private final StopWordsRemover stopWordsRemover;
     private final IdfComputer idfComputer;
     private final SCStemmer stemmer;
+    private final GroupedArticlesRepository groupedArticlesRepository;
 
     public NewsGrouper(final ArticleRepository articleRepository,
                        final SimilarityRepository similarityRepository,
+                       final GroupedArticlesRepository groupedArticlesRepository,
                        final StopWordsRemover stopWordsRemover,
                        final IdfComputer idfComputer,
                        final SCStemmer stemmer) {
         this.articleRepository = articleRepository;
         this.similarityRepository = similarityRepository;
+        this.groupedArticlesRepository = groupedArticlesRepository;
+
         this.stopWordsRemover = stopWordsRemover;
         this.idfComputer = idfComputer;
         this.stemmer = stemmer;
@@ -48,36 +53,13 @@ public final class NewsGrouper {
     }
 
     private void writeArticleSubjects(final List<Similarity> recentSimilarities) {
-        final List<Set<NewsArticle>> listOfNewsArticleSets = new ArrayList<>();
+        final List<ArticlesGroup> articlesGroupList = saveGroupedArticles(recentSimilarities);
 
-        // group articles
-        for (final Similarity similarity : recentSimilarities) {
-            if (similarity.getSimilarity() > SIMILARITY_EDGE) {
-                final NewsArticle firstArticle = articleRepository.get(similarity.getFirstArticleId());
-                final NewsArticle secondArticle = articleRepository.get(similarity.getSecondArticleId());
-
-                final Optional<Set<NewsArticle>> firstArticleSetOptional = getArticleSetInArray(firstArticle, listOfNewsArticleSets);
-                final Optional<Set<NewsArticle>> secondArticleSetOptional = getArticleSetInArray(secondArticle, listOfNewsArticleSets);
-
-                if (firstArticleSetOptional.isPresent()) {
-                    firstArticleSetOptional.ifPresent(newsArticles -> newsArticles.add(secondArticle));
-                } else if (secondArticleSetOptional.isPresent()) {
-                    secondArticleSetOptional.ifPresent(newsArticles -> newsArticles.add(firstArticle));
-                } else {
-                    final HashSet<NewsArticle> similaritySet = new HashSet<>();
-                    similaritySet.add(firstArticle);
-                    similaritySet.add(secondArticle);
-
-                    listOfNewsArticleSets.add(similaritySet);
-                }
-            }
-        }
-
-        for (final Set<NewsArticle> newsArticleSet : listOfNewsArticleSets) {
+        for (final ArticlesGroup articlesGroup : articlesGroupList) {
             final Set<String> subjects = new HashSet<>();
 
             //add first n tfIdfs to subjects
-            for (final NewsArticle newsArticle : newsArticleSet) {
+            for (final NewsArticle newsArticle : articlesGroup.getArticles()) {
                 subjects.addAll(
                         newsArticle.getTfIdfs().entrySet().stream()
                                 .sorted((entry1, entry2) -> (int) ((entry2.getValue() - entry1.getValue()) * 10))
@@ -88,14 +70,14 @@ public final class NewsGrouper {
             }
 
             //remove uncommon
-            for (final NewsArticle newsArticle : newsArticleSet) {
+            for (final NewsArticle newsArticle : articlesGroup.getArticles()) {
                 subjects.removeIf(subject -> !newsArticle.getTfIdfs().containsKey(subject));
             }
 
             System.out.println();
             subjects.forEach(subject -> System.out.print(subject + ", "));
 
-            for (final NewsArticle newsArticle : newsArticleSet) {
+            for (final NewsArticle newsArticle : articlesGroup.getArticles()) {
                 newsArticle.setSubjects(subjects);
                 articleRepository.update(newsArticle);
             }
@@ -104,9 +86,42 @@ public final class NewsGrouper {
 
     }
 
-    private Optional<Set<NewsArticle>> getArticleSetInArray(final NewsArticle element, final List<Set<NewsArticle>> listOfNewsArticleSets) {
-        return listOfNewsArticleSets.stream()
-                .filter(newsArticleSet -> newsArticleSet.contains(element))
+    private List<ArticlesGroup> saveGroupedArticles(final List<Similarity> recentSimilarities) {
+        final List<ArticlesGroup> articlesGroupList = new ArrayList<>();
+
+        for (final Similarity similarity : recentSimilarities) {
+            if (similarity.getSimilarity() > SIMILARITY_EDGE) {
+                final NewsArticle firstArticle = articleRepository.get(similarity.getFirstArticleId());
+                final NewsArticle secondArticle = articleRepository.get(similarity.getSecondArticleId());
+
+                final Optional<ArticlesGroup> firstArticleSetOptional = getArticleSetInArray(firstArticle, articlesGroupList);
+                final Optional<ArticlesGroup> secondArticleSetOptional = getArticleSetInArray(secondArticle, articlesGroupList);
+
+                if (firstArticleSetOptional.isPresent()) {
+                    firstArticleSetOptional.ifPresent(newsArticles -> newsArticles.addToGroup(secondArticle));
+                } else if (secondArticleSetOptional.isPresent()) {
+                    secondArticleSetOptional.ifPresent(newsArticles -> newsArticles.addToGroup(firstArticle));
+                } else {
+                    final ArticlesGroup articlesGroup = new ArticlesGroup();
+                    articlesGroup.addToGroup(firstArticle);
+                    articlesGroup.addToGroup(secondArticle);
+
+                    articlesGroupList.add(articlesGroup);
+                }
+            }
+        }
+
+        //TODO atomicity
+        groupedArticlesRepository.removeAll();
+        groupedArticlesRepository.saveAll(articlesGroupList);
+
+
+        return articlesGroupList;
+    }
+
+    private Optional<ArticlesGroup> getArticleSetInArray(final NewsArticle element, final List<ArticlesGroup> listOfNewsArticleGroups) {
+        return listOfNewsArticleGroups.stream()
+                .filter(newsArticleGroups -> newsArticleGroups.getArticles().contains(element))
                 .findFirst();
     }
 

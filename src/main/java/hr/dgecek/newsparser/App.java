@@ -74,13 +74,15 @@ public final class App {
         final SCStemmer stemmer = new LjubesicPandzicStemmer();
         final StopWordsRemover stopWordsRemover = new StopWordsRemoverImpl(negationsManager);
         final Categorizer categorizer = new CategorizerImpl();
-        final NewsDownloader downloader = new NewsDownloader(articleRepository, dateProvider, categorizer);
+        final GroupedArticlesRepository groupedArticlesRepository = new GroupedArticlesRepositoryImpl(datastore);
+
+        downloader = new NewsDownloader(articleRepository, dateProvider, categorizer);
         //final NewsAnnotator annotator = new NewsAnnotator(articleRepository, categorizer);
         final SentimentFilter sentimentFilter = new SentimentFilterImpl(stemmer);
-        final FeaturesFormatter featuresFormatter = new FeaturesFormatter(articleRepository, stemmer, stopWordsRemover, categorizer, negationsManager, sentimentFilter);
-        final DataClassifier dataClassifier = new DataClassifier(articleRepository);
-        final IdfComputer idfComputer = new IdfComputerImpl(articleRepository, stopWordsRemover, stemmer);
-        final NewsGrouper newsGrouper = new NewsGrouper(articleRepository, similarityRepository, stopWordsRemover, idfComputer, stemmer);
+        featuresFormatter = new FeaturesFormatter(articleRepository, stemmer, stopWordsRemover, categorizer, negationsManager, sentimentFilter);
+        dataClassifier = new DataClassifier(articleRepository);
+        idfComputer = new IdfComputerImpl(articleRepository, stopWordsRemover, stemmer);
+        newsGrouper = new NewsGrouper(articleRepository, similarityRepository, groupedArticlesRepository, stopWordsRemover, idfComputer, stemmer);
         //final SimilarityAnottator similarityAnottator = new SimilarityAnottator(similarityRepository, articleRepository);
         //final TopicsStatisticsRepository topicsStatisticsRepository = new TopicsStatisticsRepositoryMemoryImpl();
         //final NewsAnalyzer analyzer = new NewsAnalyzer(articleRepository, stemmer, topicsStatisticsRepository);
